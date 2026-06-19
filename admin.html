@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Mencegah zoom tidak sengaja saat menekan tombol di HP */
         button, a { touch-action: manipulation; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -18,7 +17,7 @@
     <div id="login-admin-screen" class="fixed inset-0 bg-gray-900 z-50 flex flex-col justify-center items-center p-4">
         <div class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center">
             <h2 class="text-2xl font-bold mb-2 text-blue-600">PANEL OWNER</h2>
-            <p class="text-xs md:text-sm text-gray-500 mb-6" id="status-koneksi">Mengunduh keamanan...</p>
+            <p class="text-xs md:text-sm text-gray-500 mb-6" id="status-koneksi">Masukkan PIN Anda</p>
             <input type="password" id="pin-admin" readonly class="w-full text-center text-3xl font-bold tracking-widest p-3 border rounded-xl bg-gray-50 mb-6 focus:outline-none">
             
             <div class="grid grid-cols-3 gap-2 md:gap-3">
@@ -35,24 +34,24 @@
                 <button onclick="tekanPin('0')" class="bg-gray-200 text-xl font-bold p-3 md:p-4 rounded-xl active:bg-gray-300">0</button>
                 <button onclick="verifikasiOwner()" class="bg-blue-600 text-white text-sm md:text-base font-bold p-3 md:p-4 rounded-xl active:bg-blue-700">OK</button>
             </div>
-            <a href="https://testingkasir3.nursyawal8.workers.dev/" class="block mt-6 text-sm text-blue-500 underline active:text-blue-700">Kembali ke Layar Kasir</a>
+            <a href="./index.html" class="block mt-6 text-sm text-blue-500 underline">Kembali ke Layar Kasir</a>
         </div>
     </div>
 
     <header class="md:hidden bg-gray-900 text-white p-4 flex justify-between items-center shadow-md shrink-0">
         <h1 class="text-lg font-bold text-blue-400">ADMIN POS</h1>
-        <a href="https://testingkasir3.nursyawal8.workers.dev/" class="bg-gray-800 px-3 py-2 rounded-lg text-xs font-bold border border-gray-700 active:bg-gray-700">🏪 Ke Kasir</a>
+        <a href="./index.html" class="bg-gray-800 px-3 py-2 rounded-lg text-xs font-bold border border-gray-700">🏪 Ke Kasir</a>
     </header>
 
     <aside class="w-64 bg-gray-900 text-white flex-col hidden md:flex shrink-0">
         <div class="p-6 text-center border-b border-gray-800"><h1 class="text-2xl font-bold text-blue-400">ADMIN POS</h1></div>
-        <nav class="flex-1 p-4 space-y-2"><a href="https://testingkasir3.nursyawal8.workers.dev/" class="block px-4 py-3 bg-gray-800 rounded-lg text-center font-bold hover:bg-gray-700 transition">🏪 Layar Kasir</a></nav>
+        <nav class="flex-1 p-4 space-y-2"><a href="./index.html" class="block px-4 py-3 bg-gray-800 rounded-lg text-center font-bold">🏪 Layar Kasir</a></nav>
     </aside>
 
     <main class="flex-1 overflow-y-auto p-4 md:p-10 w-full">
         <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
             <h2 class="text-2xl md:text-3xl font-bold">Ringkasan Bisnis</h2>
-            <button onclick="muatDataLaporan(); muatKatalog();" class="w-full sm:w-auto bg-blue-100 text-blue-600 px-4 py-2.5 rounded-lg font-bold active:bg-blue-200 transition">🔄 Refresh Data</button>
+            <button onclick="muatDataLaporan(); muatKatalog();" class="w-full sm:w-auto bg-blue-100 text-blue-600 px-4 py-2.5 rounded-lg font-bold active:bg-blue-200">🔄 Refresh Data</button>
         </header>
         
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-8">
@@ -68,9 +67,7 @@
             </div>
             <div class="bg-white p-4 md:p-6 rounded-2xl border shadow-sm">
                 <h3 class="font-bold mb-4 md:mb-6 text-gray-800">🏆 Kinerja Kasir</h3>
-                <ul id="list-kinerja-kasir" class="space-y-3">
-                    <p class="text-gray-400 text-sm">Belum ada transaksi.</p>
-                </ul>
+                <ul id="list-kinerja-kasir" class="space-y-3"><p class="text-gray-400 text-sm">Belum ada transaksi.</p></ul>
             </div>
         </div>
 
@@ -89,8 +86,8 @@
         <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
             <h2 class="text-xl md:text-2xl font-bold">Katalog Produk</h2>
             <div class="flex gap-2 w-full sm:w-auto">
-                <button onclick="toggleModal('modal-tambah-produk')" class="flex-1 sm:flex-none bg-blue-600 text-white px-3 py-2 rounded-lg font-bold text-sm shadow-sm active:bg-blue-700">Produk Baru</button>
-                <button onclick="toggleModal('modal-tambah-stok')" class="flex-1 sm:flex-none bg-green-500 text-white px-3 py-2 rounded-lg font-bold text-sm shadow-sm active:bg-green-600">Stok Masuk</button>
+                <button onclick="toggleModal('modal-tambah-produk')" class="flex-1 sm:flex-none bg-blue-600 text-white px-3 py-2 rounded-lg font-bold text-sm shadow-sm">Produk Baru</button>
+                <button onclick="toggleModal('modal-tambah-stok')" class="flex-1 sm:flex-none bg-green-500 text-white px-3 py-2 rounded-lg font-bold text-sm shadow-sm">Stok Masuk</button>
             </div>
         </header>
         <div class="bg-white rounded-xl md:rounded-2xl border shadow-sm mb-10 overflow-x-auto">
@@ -114,8 +111,8 @@
             </div>
             <input type="number" id="inp-harga" placeholder="Harga Jual" class="w-full p-2 border rounded-lg mb-4 text-sm outline-none focus:ring-2 focus:ring-blue-500">
             <div class="flex gap-2">
-                <button onclick="toggleModal('modal-tambah-produk')" class="w-1/2 border py-2 rounded-lg font-bold text-sm active:bg-gray-50">Batal</button>
-                <button onclick="simpanProdukBaru()" class="w-1/2 bg-blue-600 text-white py-2 rounded-lg font-bold text-sm active:bg-blue-700">Simpan</button>
+                <button onclick="toggleModal('modal-tambah-produk')" class="w-1/2 border py-2 rounded-lg font-bold text-sm">Batal</button>
+                <button onclick="simpanProdukBaru()" class="w-1/2 bg-blue-600 text-white py-2 rounded-lg font-bold text-sm">Simpan</button>
             </div>
         </div>
     </div>
@@ -130,8 +127,8 @@
             </div>
             <input id="stok-supplier" placeholder="Supplier" class="w-full p-2 border rounded-lg mb-4 text-sm outline-none focus:ring-2 focus:ring-blue-500">
             <div class="flex gap-2">
-                <button onclick="toggleModal('modal-tambah-stok')" class="w-1/2 border py-2 rounded-lg font-bold text-sm active:bg-gray-50">Batal</button>
-                <button onclick="simpanStokMasuk()" class="w-1/2 bg-green-500 text-white py-2 rounded-lg font-bold text-sm active:bg-green-600">Proses</button>
+                <button onclick="toggleModal('modal-tambah-stok')" class="w-1/2 border py-2 rounded-lg font-bold text-sm">Batal</button>
+                <button onclick="simpanStokMasuk()" class="w-1/2 bg-green-500 text-white py-2 rounded-lg font-bold text-sm">Proses</button>
             </div>
         </div>
     </div>
@@ -140,43 +137,45 @@
         <div class="bg-white p-5 md:p-6 rounded-2xl w-full max-w-md flex flex-col max-h-[85vh]">
             <h3 class="font-bold text-lg mb-3 border-b pb-2">Detail Transaksi</h3>
             <div id="detail-trx-content" class="overflow-y-auto flex-1 text-sm space-y-2 mb-4 pr-1"></div>
-            <button onclick="toggleModal('modal-detail-trx')" class="w-full bg-gray-200 py-2.5 rounded-lg font-bold active:bg-gray-300">Tutup</button>
+            <button onclick="toggleModal('modal-detail-trx')" class="w-full bg-gray-200 py-2.5 rounded-lg font-bold">Tutup</button>
         </div>
     </div>
 
     <script>
         const URL_GAS = "https://script.google.com/macros/s/AKfycbyJ-Whc2-BmYpH9p30HLXUCvnWjn90eV9kSBgfwISz8kY7Vi0A-EUkxM1cPVaZxQ9f9/exec"; 
+        const SECRET_KEY = "GembokKasirPintar2026"; // LAPISAN 1
         
         let chartInstance;
-        let DB_OWNER = {}; 
+        let OWNER_PIN = ""; // LAPISAN 2: PIN murni disimpan lokal setelah verifikasi cloud berhasil
         let RIWAYAT_GLOBAL = []; 
 
         function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
         function tekanPin(n) { document.getElementById('pin-admin').value += n; }
         function bersihkanPin() { document.getElementById('pin-admin').value = ""; }
 
-        async function initKeamanan() {
+        // LAPISAN 2: Meminta verifikasi PIN Owner ke Server secara real-time
+        async function verifikasiOwner() {
+            const pin = document.getElementById('pin-admin').value;
+            document.getElementById('status-koneksi').innerText = "Memverifikasi Keamanan...";
             try {
-                const res = await (await fetch(URL_GAS + "?action=get_master_data")).json();
-                if(res.status === "success") {
-                    res.pengguna.forEach(u => { if(u.Peran && (u.Peran.toLowerCase() === 'owner' || u.Peran.toLowerCase() === 'admin')) DB_OWNER[u.PIN] = u.Nama; });
+                const res = await (await fetch(URL_GAS + "?action=verifikasi_owner&api_key=" + SECRET_KEY + "&pin=" + pin)).json();
+                if (res.status === "success") {
+                    OWNER_PIN = pin; // Simpan PIN ke variabel lokal untuk request selanjutnya
+                    document.getElementById('login-admin-screen').classList.add('hidden'); 
+                    muatDataLaporan(); muatKatalog();
+                } else {
+                    alert(res.message || "Akses Ditolak!");
+                    bersihkanPin();
                     document.getElementById('status-koneksi').innerText = "Masukkan PIN Anda";
                 }
             } catch(e) { document.getElementById('status-koneksi').innerText = "Gagal terhubung."; }
-        }
-
-        function verifikasiOwner() {
-            if (DB_OWNER[document.getElementById('pin-admin').value]) {
-                document.getElementById('login-admin-screen').classList.add('hidden'); 
-                muatDataLaporan(); muatKatalog();
-            } else { alert("Akses Ditolak!"); bersihkanPin(); }
         }
 
         async function muatDataLaporan() {
             document.getElementById('txt-omset').innerText = "Memuat...";
             const tbRiwayat = document.getElementById('tabel-riwayat-body');
             try {
-                const response = await fetch(URL_GAS + "?action=get_laporan");
+                const response = await fetch(URL_GAS + "?action=get_laporan&api_key=" + SECRET_KEY + "&pin=" + OWNER_PIN);
                 const res = await response.json();
                 
                 if(res.status === "error") {
@@ -198,8 +197,6 @@
                         res.kinerja_kasir.sort((a,b) => b.total - a.total).forEach(k => {
                             listKasir.innerHTML += `<li class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border shadow-sm"><div class="flex items-center gap-3"><div class="bg-blue-100 text-blue-600 font-bold p-2 rounded-full w-9 h-9 flex items-center justify-center text-sm">${k.nama.charAt(0)}</div><span class="font-bold text-gray-700 text-sm md:text-base">${k.nama}</span></div><span class="font-black text-gray-800 text-sm md:text-base">Rp ${k.total.toLocaleString('id-ID')}</span></li>`;
                         });
-                    } else {
-                        listKasir.innerHTML = `<p class="text-gray-400 text-sm">Belum ada transaksi.</p>`;
                     }
 
                     RIWAYAT_GLOBAL = res.riwayat_transaksi || [];
@@ -209,26 +206,12 @@
                     } else {
                         RIWAYAT_GLOBAL.forEach(trx => {
                             let tglStr = "Tanggal Invalid";
-                            if(trx.tanggal) {
-                                let d = new Date(trx.tanggal);
-                                if(!isNaN(d.getTime())) tglStr = d.toLocaleString('id-ID');
-                            }
-                            tbRiwayat.innerHTML += `
-                            <tr class="hover:bg-blue-50 transition">
-                                <td class="p-3 md:p-4 text-xs text-gray-500">${tglStr}</td>
-                                <td class="p-3 md:p-4 font-bold text-gray-800 text-xs md:text-sm">${trx.id_transaksi}</td>
-                                <td class="p-3 md:p-4"><span class="bg-gray-100 border text-gray-600 px-2 py-1 rounded text-[10px] md:text-xs">${trx.kasir}</span></td>
-                                <td class="p-3 md:p-4 font-bold text-brand text-xs md:text-sm">Rp ${(Number(trx.total_bayar)||0).toLocaleString('id-ID')}</td>
-                                <td class="p-3 md:p-4 text-center"><button onclick="lihatDetailTrx('${trx.id_transaksi}')" class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-200 active:bg-blue-300 shadow-sm">Rincian</button></td>
-                            </tr>`;
+                            if(trx.tanggal) { let d = new Date(trx.tanggal); if(!isNaN(d.getTime())) tglStr = d.toLocaleString('id-ID'); }
+                            tbRiwayat.innerHTML += `<tr class="hover:bg-blue-50 transition"><td class="p-3 md:p-4 text-xs text-gray-500">${tglStr}</td><td class="p-3 md:p-4 font-bold text-gray-800 text-xs md:text-sm">${trx.id_transaksi}</td><td class="p-3 md:p-4"><span class="bg-gray-100 border text-gray-600 px-2 py-1 rounded text-[10px] md:text-xs">${trx.kasir}</span></td><td class="p-3 md:p-4 font-bold text-brand text-xs md:text-sm">Rp ${(Number(trx.total_bayar)||0).toLocaleString('id-ID')}</td><td class="p-3 md:p-4 text-center"><button onclick="lihatDetailTrx('${trx.id_transaksi}')" class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-200 shadow-sm">Rincian</button></td></tr>`;
                         });
                     }
                 }
-            } catch(e) { 
-                console.error(e);
-                document.getElementById('txt-omset').innerText = "Rp 0"; 
-                tbRiwayat.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-500">Gagal memuat JSON.</td></tr>`;
-            }
+            } catch(e) { document.getElementById('txt-omset').innerText = "Rp 0"; }
         }
 
         function lihatDetailTrx(idTrx) {
@@ -236,44 +219,34 @@
             if(!trx) return;
             const c = document.getElementById('detail-trx-content');
             let itemStr = (trx.items || []).map(i => `<div class="flex justify-between text-gray-600"><span>${i.qty}x ${i.nama}</span><span>Rp ${(Number(i.subtotal)||0).toLocaleString('id-ID')}</span></div>`).join('');
-            
             let tglStr = "Tanggal Invalid";
-            if(trx.tanggal) {
-                let d = new Date(trx.tanggal);
-                if(!isNaN(d.getTime())) tglStr = d.toLocaleString('id-ID');
-            }
+            if(trx.tanggal) { let d = new Date(trx.tanggal); if(!isNaN(d.getTime())) tglStr = d.toLocaleString('id-ID'); }
 
-            c.innerHTML = `
-                <div class="mb-3">
-                    <p class="text-xs text-gray-500">No. Nota:</p><p class="font-bold text-gray-800">${trx.id_transaksi}</p>
-                    <p class="text-xs text-gray-500 mt-2">Waktu:</p><p class="font-bold text-gray-800">${tglStr}</p>
-                    <p class="text-xs text-gray-500 mt-2">Staf Kasir:</p><p class="font-bold text-blue-600">${trx.kasir}</p>
-                </div>
-                <div class="border-t border-b py-3 my-2 space-y-1.5 bg-gray-50 p-3 rounded-lg">${itemStr}</div>
-                <div class="flex justify-between font-bold text-lg md:text-xl mt-3 text-gray-800"><span>TOTAL</span><span class="text-brand">Rp ${(Number(trx.total_bayar)||0).toLocaleString('id-ID')}</span></div>
-            `;
+            c.innerHTML = `<div class="mb-3"><p class="text-xs text-gray-500">No. Nota:</p><p class="font-bold text-gray-800">${trx.id_transaksi}</p><p class="text-xs text-gray-500 mt-2">Waktu:</p><p class="font-bold text-gray-800">${tglStr}</p><p class="text-xs text-gray-500 mt-2">Staf Kasir:</p><p class="font-bold text-blue-600">${trx.kasir}</p></div><div class="border-t border-b py-3 my-2 space-y-1.5 bg-gray-50 p-3 rounded-lg">${itemStr}</div><div class="flex justify-between font-bold text-lg md:text-xl mt-3 text-gray-800"><span>TOTAL</span><span class="text-brand">Rp ${(Number(trx.total_bayar)||0).toLocaleString('id-ID')}</span></div>`;
             toggleModal('modal-detail-trx');
         }
 
         async function muatKatalog() {
             try {
-                const res = await (await fetch(URL_GAS + "?action=get_master_data")).json();
+                const res = await (await fetch(URL_GAS + "?action=get_admin_products&api_key=" + SECRET_KEY + "&pin=" + OWNER_PIN)).json();
                 const tb = document.getElementById('tabel-produk-body'); tb.innerHTML = "";
-                res.produk.forEach(p => { tb.innerHTML += `<tr class="border-b hover:bg-gray-50"><td class="p-3 md:p-4 text-xs md:text-sm">${p.SKU}</td><td class="p-3 md:p-4 font-bold text-xs md:text-sm">${p.Nama}</td><td class="p-3 md:p-4 text-xs md:text-sm">Rp ${Number(p.Harga_Jual).toLocaleString('id-ID')}</td><td class="p-3 md:p-4 text-gray-500 text-xs md:text-sm">Rp ${(Number(p.HPP)||0).toLocaleString('id-ID')}</td><td class="p-3 md:p-4 font-bold text-blue-600 text-xs md:text-sm">${p.Stok_Sekarang||0}</td></tr>`; });
+                res.produk.forEach(p => { tb.innerHTML += `<tr class="border-b hover:bg-gray-50"><td class="p-3 md:p-4 text-xs md:text-sm">${p.SKU}</td><td class="p-3 md:p-4 font-bold text-xs md:text-sm">${p.Nama}</td><td class="p-4">Rp ${Number(p.Harga_Jual).toLocaleString('id-ID')}</td><td class="p-3 md:p-4 text-gray-500 text-xs md:text-sm">Rp ${(Number(p.HPP||0).toLocaleString('id-ID')}</td><td class="p-3 md:p-4 font-bold text-blue-600 text-xs md:text-sm">${p.Stok_Sekarang||0}</td></tr>`; });
             } catch(e){}
         }
 
         async function simpanProdukBaru() {
             const data = { sku: document.getElementById('inp-sku').value, nama: document.getElementById('inp-nama').value, kategori: document.getElementById('inp-kategori').value, satuan: document.getElementById('inp-satuan').value, harga_jual: parseInt(document.getElementById('inp-harga').value), hpp: 0, stok_awal: 0 };
-            toggleModal('modal-tambah-produk'); await fetch(URL_GAS, { method: 'POST', body: JSON.stringify({ action: "tambah_produk_baru", data: data }) }); muatKatalog();
+            toggleModal('modal-tambah-produk'); 
+            await fetch(URL_GAS, { method: 'POST', body: JSON.stringify({ action: "tambah_produk_baru", api_key: SECRET_KEY, pin: OWNER_PIN, data: data }) }); 
+            muatKatalog();
         }
 
         async function simpanStokMasuk() {
             const data = { sku: document.getElementById('stok-sku').value, qty: parseInt(document.getElementById('stok-qty').value), harga_beli: parseInt(document.getElementById('stok-harga-beli').value), supplier: document.getElementById('stok-supplier').value };
-            toggleModal('modal-tambah-stok'); await fetch(URL_GAS, { method: 'POST', body: JSON.stringify({ action: "tambah_stok_supplier", data: data }) }); muatKatalog();
+            toggleModal('modal-tambah-stok'); 
+            await fetch(URL_GAS, { method: 'POST', body: JSON.stringify({ action: "tambah_stok_supplier", api_key: SECRET_KEY, pin: OWNER_PIN, data: data }) }); 
+            muatKatalog();
         }
-
-        initKeamanan();
     </script>
 </body>
 </html>
