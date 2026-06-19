@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>POS Kasir Pintar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -12,79 +12,115 @@
         .bg-brand { background-color: var(--color-primary); }
         .text-brand { color: var(--color-primary); }
         .border-brand { border-color: var(--color-primary); }
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        /* Mencegah zoom tidak sengaja saat menekan tombol cepat di HP */
+        button { touch-action: manipulation; }
     </style>
 </head>
 <body class="bg-gray-100 h-screen overflow-hidden flex flex-col font-sans">
 
     <div id="login-screen" class="fixed inset-0 bg-brand z-50 flex flex-col justify-center items-center">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-80 text-center">
+        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl w-11/12 max-w-sm text-center">
             <h2 class="text-2xl font-bold mb-2 text-gray-800">POS KASIR</h2>
             <input type="password" id="pin-input" readonly class="w-full text-center text-3xl font-bold tracking-widest p-3 border rounded-xl bg-gray-50 mb-6 focus:outline-none">
-            <div class="grid grid-cols-3 gap-3">
-                <button onclick="tekanPin('1')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">1</button>
-                <button onclick="tekanPin('2')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">2</button>
-                <button onclick="tekanPin('3')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">3</button>
-                <button onclick="tekanPin('4')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">4</button>
-                <button onclick="tekanPin('5')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">5</button>
-                <button onclick="tekanPin('6')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">6</button>
-                <button onclick="tekanPin('7')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">7</button>
-                <button onclick="tekanPin('8')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">8</button>
-                <button onclick="tekanPin('9')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">9</button>
-                <button onclick="bersihkanPin()" class="bg-red-100 text-red-600 text-sm font-bold p-4 rounded-xl">C</button>
-                <button onclick="tekanPin('0')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">0</button>
-                <button onclick="verifikasiPin()" class="bg-green-500 text-white text-sm font-bold p-4 rounded-xl">OK</button>
+            <div class="grid grid-cols-3 gap-2 md:gap-3">
+                <button onclick="tekanPin('1')" class="bg-gray-200 text-xl font-bold p-3 md:p-4 rounded-xl active:bg-gray-300">1</button>
+                <button onclick="tekanPin('2')" class="bg-gray-200 text-xl font-bold p-3 md:p-4 rounded-xl active:bg-gray-300">2</button>
+                <button onclick="tekanPin('3')" class="bg-gray-200 text-xl font-bold p-3 md:p-4 rounded-xl active:bg-gray-300">3</button>
+                <button onclick="tekanPin('4')" class="bg-gray-200 text-xl font-bold p-3 md:p-4 rounded-xl active:bg-gray-300">4</button>
+                <button onclick="tekanPin('5')" class="bg-gray-200 text-xl font-bold p-3 md:p-4 rounded-xl active:bg-gray-300">5</button>
+                <button onclick="tekanPin('6')" class="bg-gray-200 text-xl font-bold p-3 md:p-4 rounded-xl active:bg-gray-300">6</button>
+                <button onclick="tekanPin('7')" class="bg-gray-200 text-xl font-bold p-3 md:p-4 rounded-xl active:bg-gray-300">7</button>
+                <button onclick="tekanPin('8')" class="bg-gray-200 text-xl font-bold p-3 md:p-4 rounded-xl active:bg-gray-300">8</button>
+                <button onclick="tekanPin('9')" class="bg-gray-200 text-xl font-bold p-3 md:p-4 rounded-xl active:bg-gray-300">9</button>
+                <button onclick="bersihkanPin()" class="bg-red-100 text-red-600 text-sm md:text-base font-bold p-3 md:p-4 rounded-xl active:bg-red-200">C</button>
+                <button onclick="tekanPin('0')" class="bg-gray-200 text-xl font-bold p-3 md:p-4 rounded-xl active:bg-gray-300">0</button>
+                <button onclick="verifikasiPin()" class="bg-green-500 text-white text-sm md:text-base font-bold p-3 md:p-4 rounded-xl active:bg-green-600">OK</button>
             </div>
         </div>
     </div>
 
-    <header class="bg-brand text-white px-4 py-3 flex justify-between items-center shadow-md">
-        <div><h1 class="text-xl font-bold">POS KASIR</h1><p class="text-xs">Kasir: <span id="nama-kasir">-</span></p></div>
-        <div class="flex gap-3 items-center">
-            <span id="sync-status" class="text-xs bg-green-400 px-2 py-1 rounded-full text-black font-semibold">Online</span>
-            <button onclick="bukaRiwayat()" class="bg-black bg-opacity-20 text-xs px-2 py-1 rounded hover:bg-opacity-40 transition">📜 Riwayat</button>
-            <button onclick="hubungkanPrinter()" id="status-printer" class="bg-black bg-opacity-20 text-xs px-2 py-1 rounded hover:bg-opacity-40 transition">🖨️ Printer</button>
-            <button onclick="window.location.href='./admin.html'" class="bg-yellow-400 text-yellow-900 text-xs px-3 py-1 rounded font-bold hover:bg-yellow-500 transition shadow-sm">👑 Owner</button>
-            <button onclick="lockScreen()" class="bg-red-500 text-xs px-3 py-1 rounded font-bold hover:bg-red-600 transition shadow-sm">Kunci</button>
+    <header class="bg-brand text-white px-3 py-2 md:px-4 md:py-3 flex flex-wrap gap-2 justify-between items-center shadow-md shrink-0">
+        <div>
+            <h1 class="text-lg md:text-xl font-bold leading-tight">POS KASIR</h1>
+            <p class="text-[10px] md:text-xs">Kasir: <span id="nama-kasir">-</span></p>
+        </div>
+        <div class="flex flex-wrap gap-1 md:gap-3 items-center justify-end">
+            <span id="sync-status" class="text-[10px] md:text-xs bg-green-400 px-2 py-1 rounded-full text-black font-semibold">Online</span>
+            <button onclick="bukaRiwayat()" class="bg-black bg-opacity-20 text-[10px] md:text-xs px-2 py-1 md:px-3 md:py-1.5 rounded hover:bg-opacity-40 transition">📜 Riwayat</button>
+            <button onclick="hubungkanPrinter()" id="status-printer" class="bg-black bg-opacity-20 text-[10px] md:text-xs px-2 py-1 md:px-3 md:py-1.5 rounded hover:bg-opacity-40 transition">🖨️ Printer</button>
+            <button onclick="window.location.href='./admin.html'" class="bg-yellow-400 text-yellow-900 text-[10px] md:text-xs px-2 py-1 md:px-3 md:py-1.5 rounded font-bold hover:bg-yellow-500 transition shadow-sm shrink-0">👑 Owner</button>
+            <button onclick="lockScreen()" class="bg-red-500 text-[10px] md:text-xs px-2 py-1 md:px-3 md:py-1.5 rounded font-bold hover:bg-red-600 transition shadow-sm">Kunci</button>
         </div>
     </header>
 
-    <main class="flex flex-1 overflow-hidden flex-col lg:flex-row">
-        <section class="flex-1 p-4 overflow-y-auto lg:w-2/3">
-            <div class="flex gap-2 mb-4">
-                <input type="text" id="search-product" placeholder="Cari Produk / Barcode..." class="flex-1 p-3 rounded-xl border focus:ring-2 focus:ring-brand">
-                <button onclick="bukaScanner()" class="bg-white text-brand border border-brand font-bold px-4 rounded-xl shadow-sm">📷 Scan</button>
+    <main class="flex flex-1 flex-col lg:flex-row overflow-hidden">
+        
+        <section class="flex flex-col flex-1 h-[55%] lg:h-full lg:w-2/3 border-b lg:border-b-0 border-gray-200">
+            <div class="p-3 bg-white shrink-0 shadow-sm z-10 flex gap-2">
+                <input type="text" id="search-product" placeholder="Cari Produk / Barcode..." class="flex-1 p-2 md:p-3 text-sm rounded-lg md:rounded-xl border focus:ring-2 focus:ring-brand outline-none">
+                <button onclick="bukaScanner()" class="bg-white text-brand border border-brand font-bold text-sm px-3 md:px-4 rounded-lg md:rounded-xl shadow-sm active:bg-gray-50">📷 Scan</button>
             </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" id="container-produk"></div>
+            
+            <div class="flex-1 overflow-y-auto p-3">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="container-produk">
+                    </div>
+            </div>
         </section>
 
-        <aside class="w-full lg:w-96 bg-white shadow-xl border-l flex flex-col h-full z-10">
-            <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
-                <h2 class="font-bold">Daftar Belanja</h2>
-                <button onclick="toggleModal('modal-open-bill')" class="text-xs text-brand border border-brand px-2 py-1 rounded">+ Open Bill</button>
+        <aside class="flex flex-col h-[45%] lg:h-full w-full lg:w-96 bg-white shadow-xl lg:border-l z-20">
+            <div class="p-3 border-b bg-gray-50 flex justify-between items-center shrink-0">
+                <h2 class="font-bold text-sm md:text-base text-gray-800">Daftar Belanja</h2>
+                <button onclick="toggleModal('modal-open-bill')" class="text-[10px] md:text-xs text-brand border border-brand px-2 py-1 rounded active:bg-blue-50">+ Open Bill</button>
             </div>
-            <div id="open-bill-indicator" class="hidden bg-amber-50 px-4 py-2 text-xs text-amber-700 flex justify-between border-b">
-                <span>Bon: <strong id="lbl-pelanggan"></strong></span><button onclick="batalOpenBill()" class="text-red-500">X</button>
+            
+            <div id="open-bill-indicator" class="hidden bg-amber-50 px-3 py-1.5 text-xs text-amber-700 flex justify-between border-b shrink-0">
+                <span class="truncate">Bon: <strong id="lbl-pelanggan"></strong></span>
+                <button onclick="batalOpenBill()" class="text-red-500 font-bold ml-2">X</button>
             </div>
-            <div class="flex-1 overflow-y-auto p-4 space-y-3" id="cart-items"></div>
-            <div class="p-4 border-t bg-gray-50 space-y-2">
-                <div class="flex justify-between items-center text-sm"><span>Diskon:</span><input type="number" id="input-diskon" value="0" oninput="hitungTotal()" class="w-24 p-1 border text-right rounded"></div>
-                <div class="flex justify-between items-center text-sm"><span>Metode:</span>
-                    <select id="select-payment" class="p-1 border rounded bg-white w-24"><option>Tunai</option><option>QRIS</option><option>Transfer</option></select>
+            
+            <div class="flex-1 overflow-y-auto p-3 space-y-2 bg-gray-50" id="cart-items">
+                <p class="text-center text-gray-400 mt-5 text-sm">Keranjang kosong</p>
+            </div>
+            
+            <div class="p-3 border-t bg-white shrink-0">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs md:text-sm text-gray-600">Diskon:</span>
+                    <input type="number" id="input-diskon" value="0" oninput="hitungTotal()" class="w-20 md:w-24 p-1 text-sm border text-right rounded outline-none focus:border-brand">
                 </div>
-                <div class="flex justify-between font-bold text-xl pt-2 border-t"><span>Total:</span><span id="txt-total">Rp 0</span></div>
-                <button onclick="selesaikanTransaksi('Closed')" class="w-full bg-green-500 text-white font-bold py-3 rounded-xl shadow-md mt-2">Bayar</button>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs md:text-sm text-gray-600">Metode:</span>
+                    <select id="select-payment" class="w-20 md:w-24 p-1 text-sm border rounded bg-white outline-none">
+                        <option>Tunai</option><option>QRIS</option><option>Transfer</option>
+                    </select>
+                </div>
+                <div class="flex justify-between font-bold text-lg md:text-xl pt-2 border-t text-gray-800">
+                    <span>Total:</span><span id="txt-total" class="text-brand">Rp 0</span>
+                </div>
+                <button onclick="selesaikanTransaksi('Closed')" class="w-full bg-green-500 text-white font-bold py-2.5 md:py-3 rounded-lg md:rounded-xl shadow-md mt-3 active:bg-green-600 text-sm md:text-base">Bayar Sekarang</button>
             </div>
         </aside>
     </main>
 
-    <div id="modal-scanner" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex justify-center items-center"><div class="bg-white p-4 rounded-xl w-11/12 max-w-md"><div class="flex justify-between mb-4"><h3 class="font-bold">Kamera Barcode</h3><button onclick="tutupScanner()" class="text-red-500 bg-red-100 px-3 py-1 rounded">X</button></div><div id="reader"></div></div></div>
-    <div id="modal-open-bill" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden flex justify-center items-center"><div class="bg-white p-6 rounded-xl w-80"><h3 class="font-bold mb-4">Simpan Bon</h3><input type="text" id="ob-pelanggan" placeholder="Nama Pelanggan" class="w-full p-2 border rounded mb-3"><input type="text" id="ob-meja" placeholder="Nomor Meja" class="w-full p-2 border rounded mb-4"><div class="flex gap-2"><button onclick="toggleModal('modal-open-bill')" class="w-1/2 border py-2 rounded">Batal</button><button onclick="simpanSebagaiOpenBill()" class="w-1/2 bg-brand text-white py-2 rounded">Simpan</button></div></div></div>
+    <div id="modal-scanner" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex justify-center items-center"><div class="bg-white p-4 rounded-xl w-11/12 max-w-sm"><div class="flex justify-between mb-4"><h3 class="font-bold">Kamera Barcode</h3><button onclick="tutupScanner()" class="text-red-500 font-bold px-2 py-1 rounded active:bg-red-50">X</button></div><div id="reader"></div></div></div>
     
-    <div id="modal-riwayat" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex justify-center items-center"><div class="bg-white p-6 rounded-xl w-11/12 max-w-md h-[80vh] flex flex-col"><div class="flex justify-between mb-4 border-b pb-2"><h3 class="font-bold text-lg">Riwayat Kasir Lokal</h3><button onclick="toggleModal('modal-riwayat')" class="text-red-500 font-bold">X</button></div><div class="flex-1 overflow-y-auto space-y-3 pr-2" id="list-riwayat"></div></div></div>
+    <div id="modal-open-bill" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden flex justify-center items-center"><div class="bg-white p-6 rounded-xl w-11/12 max-w-sm"><h3 class="font-bold mb-4">Simpan Bon</h3><input type="text" id="ob-pelanggan" placeholder="Nama Pelanggan" class="w-full p-2 border rounded mb-3 text-sm"><input type="text" id="ob-meja" placeholder="Nomor Meja" class="w-full p-2 border rounded mb-4 text-sm"><div class="flex gap-2"><button onclick="toggleModal('modal-open-bill')" class="w-1/2 border py-2 rounded text-sm active:bg-gray-50">Batal</button><button onclick="simpanSebagaiOpenBill()" class="w-1/2 bg-brand text-white py-2 rounded text-sm active:bg-blue-700">Simpan</button></div></div></div>
+    
+    <div id="modal-riwayat" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex justify-center items-center">
+        <div class="bg-white p-4 md:p-6 rounded-xl w-11/12 max-w-md h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="font-bold text-base md:text-lg">Riwayat Kasir Lokal</h3>
+                <button onclick="toggleModal('modal-riwayat')" class="text-red-500 font-bold px-2 py-1 active:bg-red-50 rounded">X</button>
+            </div>
+            <div class="flex-1 overflow-y-auto space-y-3 pr-1" id="list-riwayat"></div>
+        </div>
+    </div>
 
     <script>
+        // ==========================================
+        // PASTE URL WEB APP APPS SCRIPT ANDA DI SINI
+        // ==========================================
         const URL_GAS = "https://script.google.com/macros/s/AKfycbyJ-Whc2-BmYpH9p30HLXUCvnWjn90eV9kSBgfwISz8kY7Vi0A-EUkxM1cPVaZxQ9f9/exec"; 
         
         let USER_DB = { "1234": "Owner" };
@@ -100,8 +136,8 @@
 
         function cekStatusInternet() {
             const b = document.getElementById('sync-status');
-            if (navigator.onLine) { b.innerText = "Online"; b.className = "text-xs bg-green-400 px-2 py-1 rounded-full text-black"; syncDataKeSheets(); } 
-            else { b.innerText = "Offline"; b.className = "text-xs bg-red-500 px-2 py-1 rounded-full text-white"; }
+            if (navigator.onLine) { b.innerText = "Online"; b.className = "text-[10px] md:text-xs bg-green-400 px-2 py-1 rounded-full text-black font-semibold"; syncDataKeSheets(); } 
+            else { b.innerText = "Offline"; b.className = "text-[10px] md:text-xs bg-red-500 px-2 py-1 rounded-full text-white font-semibold"; }
         }
         window.addEventListener('online', cekStatusInternet); window.addEventListener('offline', cekStatusInternet);
 
@@ -132,7 +168,7 @@
             const c = document.getElementById('container-produk'); c.innerHTML = "";
             PRODUCT_DB.forEach(p => {
                 const hargaTampil = parseInt(p.Harga_Jual.toString().replace(/[^0-9]/g, '')) || 0;
-                c.innerHTML += `<div onclick="tambahKeKeranjang('${p.SKU}')" class="bg-white p-4 rounded-xl border cursor-pointer hover:border-brand"><span class="text-[10px] text-gray-400">${p.Kategori}</span><h4 class="font-bold text-sm truncate">${p.Nama}</h4><span class="text-brand font-bold text-sm block mt-2">Rp ${hargaTampil.toLocaleString('id-ID')}</span></div>`;
+                c.innerHTML += `<div onclick="tambahKeKeranjang('${p.SKU}')" class="bg-white p-3 md:p-4 rounded-xl border border-gray-200 cursor-pointer active:bg-blue-50 active:border-brand shadow-sm transition"><span class="text-[9px] md:text-[10px] text-gray-400 block mb-1">${p.Kategori}</span><h4 class="font-bold text-xs md:text-sm text-gray-800 leading-tight line-clamp-2">${p.Nama}</h4><span class="text-brand font-black text-xs md:text-sm block mt-2">Rp ${hargaTampil.toLocaleString('id-ID')}</span></div>`;
             });
         }
 
@@ -145,8 +181,8 @@
         }
 
         function renderKeranjang() {
-            const c = document.getElementById('cart-items'); c.innerHTML = keranjang.length ? '' : '<p class="text-center text-gray-400 mt-10">Kosong</p>';
-            keranjang.forEach((i, idx) => { c.innerHTML += `<div class="flex justify-between items-center bg-gray-50 p-2 border rounded"><div><h5 class="font-bold text-xs">${i.nama}</h5><span class="text-[11px] text-gray-500">${i.qty} x Rp ${parseInt(i.harga).toLocaleString('id-ID')}</span></div><div class="flex gap-2"><span class="font-bold text-xs">Rp ${parseInt(i.subtotal).toLocaleString('id-ID')}</span><button onclick="hapusItem(${idx})" class="text-red-500 text-xs font-bold px-1">X</button></div></div>`; });
+            const c = document.getElementById('cart-items'); c.innerHTML = keranjang.length ? '' : '<p class="text-center text-gray-400 mt-5 text-sm">Keranjang kosong</p>';
+            keranjang.forEach((i, idx) => { c.innerHTML += `<div class="flex justify-between items-center bg-white p-2 border border-gray-100 rounded shadow-sm"><div class="flex-1 pr-2"><h5 class="font-bold text-xs text-gray-800 leading-tight">${i.nama}</h5><span class="text-[10px] md:text-[11px] text-gray-500">${i.qty} x Rp ${parseInt(i.harga).toLocaleString('id-ID')}</span></div><div class="flex items-center gap-2"><span class="font-bold text-xs text-gray-800">Rp ${parseInt(i.subtotal).toLocaleString('id-ID')}</span><button onclick="hapusItem(${idx})" class="text-red-500 bg-red-50 h-6 w-6 rounded flex items-center justify-center font-bold active:bg-red-100">X</button></div></div>`; });
             hitungTotal();
         }
         
@@ -164,7 +200,7 @@
         });
 
         function simpanSebagaiOpenBill() {
-            const n = document.getElementById('ob-pelanggan').value; if(!n) return alert("Isi nama!");
+            const n = document.getElementById('ob-pelanggan').value; if(!n) return alert("Isi nama pelanggan!");
             infoOpenBill = { nama_pelanggan: n, no_meja: document.getElementById('ob-meja').value };
             document.getElementById('lbl-pelanggan').innerText = n; document.getElementById('open-bill-indicator').classList.remove('hidden');
             toggleModal('modal-open-bill'); selesaikanTransaksi('Open');
@@ -172,7 +208,7 @@
         function batalOpenBill() { infoOpenBill = null; document.getElementById('open-bill-indicator').classList.add('hidden'); }
 
         function selesaikanTransaksi(st) {
-            if (keranjang.length === 0) return alert("Keranjang kosong!");
+            if (keranjang.length === 0) return alert("Keranjang belanja masih kosong!");
             const dsk = parseInt(document.getElementById('input-diskon').value.toString().replace(/[^0-9]/g, '')) || 0;
             const sub = keranjang.reduce((s, i) => s + parseInt(i.subtotal), 0);
             const txData = { id_transaksi: "TRX-" + Date.now(), tanggal: new Date().toISOString(), total_bayar: Math.max(0, sub - dsk), diskon_transaksi: dsk, metode_bayar: document.getElementById('select-payment').value, kasir: kasirAktif, status: st, nama_pelanggan: infoOpenBill ? infoOpenBill.nama_pelanggan : "", no_meja: infoOpenBill ? infoOpenBill.no_meja : "", items: keranjang };
@@ -180,7 +216,7 @@
             if(db) db.transaction(['transaksi_offline'], 'readwrite').objectStore('transaksi_offline').add(txData);
             riwayatLokal.push(txData); cetakStruk(txData); syncDataKeSheets();
             
-            alert(st === 'Open' ? "Bon Disimpan!" : "Transaksi Sukses!");
+            alert(st === 'Open' ? "Bon berhasil digantung/disimpan!" : "Transaksi Berhasil!");
             keranjang = []; document.getElementById('input-diskon').value = 0; batalOpenBill(); renderKeranjang();
         }
 
@@ -202,18 +238,16 @@
                         const txHapus = db.transaction(['transaksi_offline'], 'readwrite').objectStore('transaksi_offline');
                         arr.forEach(t => txHapus.delete(t.id_transaksi));
                     }
-                } catch(err) {
-                    console.log("Gagal sinkron, ditahan di HP:", err);
-                }
+                } catch(err) { console.log("Gagal sinkron, ditahan di memori lokal HP."); }
             };
         }
 
         let html5QrcodeScanner;
-        function bukaScanner() { toggleModal('modal-scanner'); html5QrcodeScanner = new Html5Qrcode("reader"); html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => { const p = PRODUCT_DB.find(x => x.SKU == txt); if (p) { tambahKeKeranjang(p.SKU); tutupScanner(); } else alert("Barcode tak ditemukan"); }).catch(e=>{}); }
+        function bukaScanner() { toggleModal('modal-scanner'); html5QrcodeScanner = new Html5Qrcode("reader"); html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => { const p = PRODUCT_DB.find(x => x.SKU == txt); if (p) { tambahKeKeranjang(p.SKU); tutupScanner(); } else alert("Barcode tidak terdaftar"); }).catch(e=>{}); }
         function tutupScanner() { toggleModal('modal-scanner'); if (html5QrcodeScanner) html5QrcodeScanner.stop().then(()=>html5QrcodeScanner.clear()); }
 
         let printerServer;
-        async function hubungkanPrinter() { try { printerServer = await (await navigator.bluetooth.requestDevice({ filters: [{ services: ['000018f0-0000-1000-8000-00805f9b34fb'] }], optionalServices: ['e7810a71-73ae-499d-8c15-faa9aef0c3f2'] })).gatt.connect(); document.getElementById('status-printer').innerText = "🖨️ " + printerServer.device.name; alert("Printer terhubung!"); } catch (err) {} }
+        async function hubungkanPrinter() { try { printerServer = await (await navigator.bluetooth.requestDevice({ filters: [{ services: ['000018f0-0000-1000-8000-00805f9b34fb'] }], optionalServices: ['e7810a71-73ae-499d-8c15-faa9aef0c3f2'] })).gatt.connect(); document.getElementById('status-printer').innerText = "🖨️ " + printerServer.device.name; alert("Printer Bluetooth Terhubung!"); } catch (err) {} }
         
         async function cetakStruk(tx) {
             if (!printerServer || !printerServer.connected) return;
@@ -230,27 +264,27 @@
         function bukaRiwayat() {
             toggleModal('modal-riwayat'); 
             const c = document.getElementById('list-riwayat'); 
-            c.innerHTML = riwayatLokal.length === 0 ? '<p class="text-center text-gray-400 mt-10">Belum ada transaksi</p>' : '';
+            c.innerHTML = riwayatLokal.length === 0 ? '<p class="text-center text-gray-400 mt-10 text-sm">Belum ada transaksi</p>' : '';
             
             [...riwayatLokal].reverse().forEach(trx => {
                 let rincianBarang = trx.items.map(i => `<div class="flex justify-between text-xs text-gray-500"><span>${i.qty}x ${i.nama}</span><span>Rp ${i.subtotal.toLocaleString('id-ID')}</span></div>`).join('');
                 
                 c.innerHTML += `
-                <div class="border rounded-xl p-4 shadow-sm bg-gray-50">
-                    <div class="flex justify-between border-b border-gray-200 pb-2 mb-2">
-                        <div>
-                            <span class="font-bold text-gray-800">${trx.id_transaksi}</span>
-                            <p class="text-[10px] text-gray-400">${new Date(trx.tanggal).toLocaleString('id-ID')} | Kasir: ${trx.kasir}</p>
+                <div class="border rounded-xl p-3 md:p-4 shadow-sm bg-white">
+                    <div class="flex justify-between border-b border-gray-100 pb-2 mb-2">
+                        <div class="truncate pr-2">
+                            <span class="font-bold text-xs md:text-sm text-gray-800">${trx.id_transaksi}</span>
+                            <p class="text-[9px] md:text-[10px] text-gray-400">${new Date(trx.tanggal).toLocaleString('id-ID')} | ${trx.kasir}</p>
                         </div>
-                        <div class="text-right">
+                        <div class="text-right shrink-0">
                             <span class="font-black text-brand text-sm">Rp ${trx.total_bayar.toLocaleString('id-ID')}</span>
-                            <p class="text-[10px] text-gray-500">${trx.metode_bayar}</p>
+                            <p class="text-[9px] md:text-[10px] text-gray-500">${trx.metode_bayar}</p>
                         </div>
                     </div>
                     <div class="space-y-1 mb-3">
                         ${rincianBarang}
                     </div>
-                    <button onclick='cetakStruk(${JSON.stringify(trx)})' class="w-full bg-blue-100 text-blue-700 font-bold py-2 rounded-lg text-xs hover:bg-blue-200 transition">🖨️ Cetak Ulang Struk</button>
+                    <button onclick='cetakStruk(${JSON.stringify(trx)})' class="w-full bg-blue-50 text-brand border border-blue-100 font-bold py-2 rounded-lg text-xs hover:bg-blue-100 active:bg-blue-200 transition shadow-sm">🖨️ Cetak Struk</button>
                 </div>`;
             });
         }
