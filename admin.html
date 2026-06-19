@@ -14,6 +14,7 @@
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans h-screen flex flex-col md:flex-row overflow-hidden">
 
+    <!-- LAYAR LOGIN ADMIN -->
     <div id="login-admin-screen" class="fixed inset-0 bg-gray-900 z-50 flex flex-col justify-center items-center p-4">
         <div class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center">
             <h2 class="text-2xl font-bold mb-2 text-blue-600">PANEL OWNER</h2>
@@ -38,16 +39,19 @@
         </div>
     </div>
 
+    <!-- HEADER KHUSUS HP -->
     <header class="md:hidden bg-gray-900 text-white p-4 flex justify-between items-center shadow-md shrink-0">
         <h1 class="text-lg font-bold text-blue-400">ADMIN POS</h1>
         <a href="./index.html" class="bg-gray-800 px-3 py-2 rounded-lg text-xs font-bold border border-gray-700">🏪 Ke Kasir</a>
     </header>
 
+    <!-- SIDEBAR PC -->
     <aside class="w-64 bg-gray-900 text-white flex-col hidden md:flex shrink-0">
         <div class="p-6 text-center border-b border-gray-800"><h1 class="text-2xl font-bold text-blue-400">ADMIN POS</h1></div>
         <nav class="flex-1 p-4 space-y-2"><a href="./index.html" class="block px-4 py-3 bg-gray-800 rounded-lg text-center font-bold">🏪 Layar Kasir</a></nav>
     </aside>
 
+    <!-- CONTAINER UTAMA -->
     <main class="flex-1 overflow-y-auto p-4 md:p-10 w-full">
         <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
             <h2 class="text-2xl md:text-3xl font-bold">Ringkasan Bisnis</h2>
@@ -100,6 +104,7 @@
         </div>
     </main>
 
+    <!-- MODALS -->
     <div id="modal-tambah-produk" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50 p-4">
         <div class="bg-white p-6 rounded-2xl w-full max-w-sm">
             <h3 class="font-bold mb-4 text-lg">Produk Baru</h3>
@@ -141,26 +146,27 @@
         </div>
     </div>
 
+    <!-- CODE SECURITY UPGRADE FRONTEND -->
     <script>
         const URL_GAS = "https://script.google.com/macros/s/AKfycbyJ-Whc2-BmYpH9p30HLXUCvnWjn90eV9kSBgfwISz8kY7Vi0A-EUkxM1cPVaZxQ9f9/exec"; 
-        const SECRET_KEY = "GembokKasirPintar2026"; // LAPISAN 1
+        const SECRET_KEY = "GembokKasirPintar2026"; 
         
         let chartInstance;
-        let OWNER_PIN = ""; // LAPISAN 2: PIN murni disimpan lokal setelah verifikasi cloud berhasil
+        let OWNER_PIN = ""; 
         let RIWAYAT_GLOBAL = []; 
 
         function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
         function tekanPin(n) { document.getElementById('pin-admin').value += n; }
         function bersihkanPin() { document.getElementById('pin-admin').value = ""; }
 
-        // LAPISAN 2: Meminta verifikasi PIN Owner ke Server secara real-time
         async function verifikasiOwner() {
             const pin = document.getElementById('pin-admin').value;
             document.getElementById('status-koneksi').innerText = "Memverifikasi Keamanan...";
             try {
-                const res = await (await fetch(URL_GAS + "?action=verifikasi_owner&api_key=" + SECRET_KEY + "&pin=" + pin)).json();
+                const response = await fetch(URL_GAS + "?action=verifikasi_owner&api_key=" + SECRET_KEY + "&pin=" + pin);
+                const res = await response.json();
                 if (res.status === "success") {
-                    OWNER_PIN = pin; // Simpan PIN ke variabel lokal untuk request selanjutnya
+                    OWNER_PIN = pin; 
                     document.getElementById('login-admin-screen').classList.add('hidden'); 
                     muatDataLaporan(); muatKatalog();
                 } else {
@@ -228,9 +234,10 @@
 
         async function muatKatalog() {
             try {
-                const res = await (await fetch(URL_GAS + "?action=get_admin_products&api_key=" + SECRET_KEY + "&pin=" + OWNER_PIN)).json();
+                const response = await fetch(URL_GAS + "?action=get_admin_products&api_key=" + SECRET_KEY + "&pin=" + OWNER_PIN);
+                const res = await response.json();
                 const tb = document.getElementById('tabel-produk-body'); tb.innerHTML = "";
-                res.produk.forEach(p => { tb.innerHTML += `<tr class="border-b hover:bg-gray-50"><td class="p-3 md:p-4 text-xs md:text-sm">${p.SKU}</td><td class="p-3 md:p-4 font-bold text-xs md:text-sm">${p.Nama}</td><td class="p-4">Rp ${Number(p.Harga_Jual).toLocaleString('id-ID')}</td><td class="p-3 md:p-4 text-gray-500 text-xs md:text-sm">Rp ${(Number(p.HPP||0).toLocaleString('id-ID')}</td><td class="p-3 md:p-4 font-bold text-blue-600 text-xs md:text-sm">${p.Stok_Sekarang||0}</td></tr>`; });
+                res.produk.forEach(p => { tb.innerHTML += `<tr class="border-b hover:bg-gray-50"><td class="p-3 md:p-4 text-xs md:text-sm">${p.SKU}</td><td class="p-3 md:p-4 font-bold text-xs md:text-sm">${p.Nama}</td><td class="p-4">Rp ${Number(p.Harga_Jual).toLocaleString('id-ID')}</td><td class="p-3 md:p-4 text-gray-500 text-xs md:text-sm">Rp ${(Number(p.HPP)||0).toLocaleString('id-ID')}</td><td class="p-3 md:p-4 font-bold text-blue-600 text-xs md:text-sm">${p.Stok_Sekarang||0}</td></tr>`; });
             } catch(e){}
         }
 
