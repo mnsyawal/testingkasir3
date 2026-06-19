@@ -101,7 +101,6 @@
 
     <div id="modal-scanner" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex justify-center items-center p-4"><div class="bg-white p-4 rounded-xl w-full max-w-sm"><div class="flex justify-between mb-4"><h3 class="font-bold">Kamera Barcode</h3><button onclick="tutupScanner()" class="text-red-500 font-bold px-3 py-1 rounded active:bg-red-50">X</button></div><div id="reader"></div></div></div>
     <div id="modal-open-bill" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden flex justify-center items-center p-4"><div class="bg-white p-6 rounded-xl w-full max-w-sm"><h3 class="font-bold mb-4">Simpan Bon</h3><input type="text" id="ob-pelanggan" placeholder="Nama Pelanggan" class="w-full p-3 border rounded-lg mb-3 text-sm focus:ring-2 outline-none focus:ring-brand"><input type="text" id="ob-meja" placeholder="Nomor Meja/Catatan" class="w-full p-3 border rounded-lg mb-4 text-sm focus:ring-2 outline-none focus:ring-brand"><div class="flex gap-2"><button onclick="toggleModal('modal-open-bill')" class="w-1/2 border py-2.5 rounded-lg text-sm font-bold active:bg-gray-50">Batal</button><button onclick="simpanSebagaiOpenBill()" class="w-1/2 bg-brand text-white py-2.5 rounded-lg text-sm font-bold active:bg-blue-700">Simpan</button></div></div></div>
-    
     <div id="modal-riwayat" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex justify-center items-center p-4">
         <div class="bg-white p-4 md:p-6 rounded-2xl w-full max-w-md h-[85vh] flex flex-col shadow-2xl">
             <div class="flex justify-between items-center mb-3 border-b pb-3">
@@ -113,12 +112,15 @@
     </div>
 
     <script>
+        // URL Web App Apps Script Anda
         const URL_GAS = "https://script.google.com/macros/s/AKfycbyJ-Whc2-BmYpH9p30HLXUCvnWjn90eV9kSBgfwISz8kY7Vi0A-EUkxM1cPVaZxQ9f9/exec"; 
         
-        let USER_DB = { "1234": "Owner" };
+        // LAPISAN 1: Sandi Komunikasi Pendukung
+        const SECRET_KEY = "GembokKasirPintar2026"; 
+        
+        let USER_DB = {};
         let PRODUCT_DB = [];
         let kasirAktif = "", keranjang = [], infoOpenBill = null;
-        
         let riwayatLokal = JSON.parse(localStorage.getItem('riwayat_kasir_lokal')) || [];
 
         if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');
@@ -135,22 +137,21 @@
         }
         window.addEventListener('online', cekStatusInternet); window.addEventListener('offline', cekStatusInternet);
 
-        // PERBAIKAN UTAMA: Sinkronisasi Riwayat Otomatis Lintas Browser/Perangkat via Cloud
         async function tarikMasterData() {
             if(!navigator.onLine) return; 
             try {
-                const res = await fetch(URL_GAS + "?action=get_master_data");
+                // Mengirimkan SECRET_KEY agar disetujui server
+                const res = await fetch(URL_GAS + "?action=get_kasir_data&api_key=" + SECRET_KEY);
                 const data = await res.json();
                 if(data.status === "success") {
                     PRODUCT_DB = data.produk;
+                    USER_DB = {};
                     data.pengguna.forEach(u => USER_DB[u.PIN] = u.Nama);
                     
-                    // Jika cloud memiliki data transaksi, timpa riwayat lokal agar sinkron lintas HP
                     if (data.riwayat && data.riwayat.length > 0) {
                         riwayatLokal = data.riwayat;
                         localStorage.setItem('riwayat_kasir_lokal', JSON.stringify(riwayatLokal));
                     }
-
                     if(kasirAktif) inisialisasiKatalog();
                 }
             } catch(e) {}
@@ -237,13 +238,17 @@
                 if (arr.length === 0) return;
                 
                 try {
-                    const res = await fetch(URL_GAS, { method: 'POST', body: JSON.stringify({ action: "sync_transaksi", data: arr }) });
+                    // Menyematkan SECRET_KEY di dalam POST Body
+                    const res = await fetch(URL_GAS, { 
+                        method: 'POST', 
+                        body: JSON.stringify({ action: "sync_transaksi", api_key: SECRET_KEY, data: arr }) 
+                    });
                     if (res.ok || res.type === 'opaque') {
                         const txHapus = db.transaction(['transaksi_offline'], 'readwrite').objectStore('transaksi_offline');
                         arr.forEach(t => txHapus.delete(t.id_transaksi));
-                        tarikMasterData(); // Jalankan ulang unduh riwayat agar sinkronisasi real-time instan
+                        tarikMasterData(); 
                     }
-                } catch(err) { console.log("Gagal sinkron, ditahan di memori lokal HP."); }
+                } catch(err) {}
             };
         }
 
@@ -273,24 +278,7 @@
             
             [...riwayatLokal].reverse().forEach(trx => {
                 let rincianBarang = trx.items.map(i => `<div class="flex justify-between text-xs text-gray-500"><span>${i.qty}x ${i.nama}</span><span>Rp ${i.subtotal.toLocaleString('id-ID')}</span></div>`).join('');
-                
-                c.innerHTML += `
-                <div class="border border-gray-200 rounded-xl p-4 shadow-sm bg-white mb-2">
-                    <div class="flex justify-between border-b border-gray-100 pb-2 mb-2">
-                        <div class="truncate pr-2">
-                            <span class="font-bold text-xs md:text-sm text-gray-800">${trx.id_transaksi}</span>
-                            <p class="text-[10px] text-gray-400">${new Date(trx.tanggal).toLocaleString('id-ID')} | ${trx.kasir}</p>
-                        </div>
-                        <div class="text-right shrink-0">
-                            <span class="font-black text-brand text-sm">Rp ${trx.total_bayar.toLocaleString('id-ID')}</span>
-                            <p class="text-[10px] text-gray-500">${trx.metode_bayar}</p>
-                        </div>
-                    </div>
-                    <div class="space-y-1 mb-3">
-                        ${rincianBarang}
-                    </div>
-                    <button onclick='cetakStruk(${JSON.stringify(trx)})' class="w-full bg-blue-50 text-brand border border-blue-100 font-bold py-2 rounded-lg text-xs hover:bg-blue-100 active:bg-blue-200 transition shadow-sm">🖨️ Cetak Ulang Struk</button>
-                </div>`;
+                c.innerHTML += `<div class="border border-gray-200 rounded-xl p-4 shadow-sm bg-white mb-2"><div class="flex justify-between border-b border-gray-100 pb-2 mb-2"><div class="truncate pr-2"><span class="font-bold text-xs md:text-sm text-gray-800">${trx.id_transaksi}</span><p class="text-[10px] text-gray-400">${new Date(trx.tanggal).toLocaleString('id-ID')} | ${trx.kasir}</p></div><div class="text-right shrink-0"><span class="font-black text-brand text-sm">Rp ${trx.total_bayar.toLocaleString('id-ID')}</span><p class="text-[10px] text-gray-500">${trx.metode_bayar}</p></div></div><div class="space-y-1 mb-3">${rincianBarang}</div><button onclick='cetakStruk(${JSON.stringify(trx)})' class="w-full bg-blue-50 text-brand border border-blue-100 font-bold py-2 rounded-lg text-xs hover:bg-blue-100 active:bg-blue-200 transition shadow-sm">🖨️ Cetak Ulang Struk</button></div>`;
             });
         }
     </script>
