@@ -19,7 +19,6 @@
 </head>
 <body class="bg-gray-100 h-[100dvh] overflow-hidden flex flex-col font-sans">
 
-    <!-- LOGIN SCREEN -->
     <div id="login-screen" class="fixed inset-0 bg-brand z-50 flex flex-col justify-center items-center">
         <div class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl w-11/12 max-w-sm text-center">
             <h2 class="text-2xl font-bold mb-2 text-gray-800">POS KASIR</h2>
@@ -41,7 +40,6 @@
         </div>
     </div>
 
-    <!-- HEADER -->
     <header class="bg-brand text-white px-3 py-2 md:px-4 md:py-3 flex flex-wrap gap-2 justify-between items-center shadow-md shrink-0">
         <div>
             <h1 class="text-lg md:text-xl font-bold leading-tight">POS KASIR</h1>
@@ -56,7 +54,6 @@
         </div>
     </header>
 
-    <!-- MAIN LAYOUT -->
     <main class="flex flex-1 flex-col lg:flex-row overflow-hidden relative">
         <section class="flex flex-col flex-1 h-[50%] lg:h-full lg:w-2/3 bg-gray-100 z-10">
             <div class="p-3 bg-white shrink-0 shadow-sm z-10 flex gap-2">
@@ -102,7 +99,6 @@
         </aside>
     </main>
 
-    <!-- MODAL POPUPS -->
     <div id="modal-scanner" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex justify-center items-center p-4"><div class="bg-white p-4 rounded-xl w-full max-w-sm"><div class="flex justify-between mb-4"><h3 class="font-bold">Kamera Barcode</h3><button onclick="tutupScanner()" class="text-red-500 font-bold px-3 py-1 rounded active:bg-red-50">X</button></div><div id="reader"></div></div></div>
     <div id="modal-open-bill" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden flex justify-center items-center p-4"><div class="bg-white p-6 rounded-xl w-full max-w-sm"><h3 class="font-bold mb-4">Simpan Bon</h3><input type="text" id="ob-pelanggan" placeholder="Nama Pelanggan" class="w-full p-3 border rounded-lg mb-3 text-sm focus:ring-2 outline-none focus:ring-brand"><input type="text" id="ob-meja" placeholder="Nomor Meja/Catatan" class="w-full p-3 border rounded-lg mb-4 text-sm focus:ring-2 outline-none focus:ring-brand"><div class="flex gap-2"><button onclick="toggleModal('modal-open-bill')" class="w-1/2 border py-2.5 rounded-lg text-sm font-bold active:bg-gray-50">Batal</button><button onclick="simpanSebagaiOpenBill()" class="w-1/2 bg-brand text-white py-2.5 rounded-lg text-sm font-bold active:bg-blue-700">Simpan</button></div></div></div>
     
@@ -123,7 +119,6 @@
         let PRODUCT_DB = [];
         let kasirAktif = "", keranjang = [], infoOpenBill = null;
         
-        // FITUR BARU: Mengambil riwayat yang tersimpan di HP, atau array kosong jika belum ada
         let riwayatLokal = JSON.parse(localStorage.getItem('riwayat_kasir_lokal')) || [];
 
         if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');
@@ -140,6 +135,7 @@
         }
         window.addEventListener('online', cekStatusInternet); window.addEventListener('offline', cekStatusInternet);
 
+        // PERBAIKAN UTAMA: Sinkronisasi Riwayat Otomatis Lintas Browser/Perangkat via Cloud
         async function tarikMasterData() {
             if(!navigator.onLine) return; 
             try {
@@ -148,6 +144,13 @@
                 if(data.status === "success") {
                     PRODUCT_DB = data.produk;
                     data.pengguna.forEach(u => USER_DB[u.PIN] = u.Nama);
+                    
+                    // Jika cloud memiliki data transaksi, timpa riwayat lokal agar sinkron lintas HP
+                    if (data.riwayat && data.riwayat.length > 0) {
+                        riwayatLokal = data.riwayat;
+                        localStorage.setItem('riwayat_kasir_lokal', JSON.stringify(riwayatLokal));
+                    }
+
                     if(kasirAktif) inisialisasiKatalog();
                 }
             } catch(e) {}
@@ -214,7 +217,6 @@
 
             if(db) db.transaction(['transaksi_offline'], 'readwrite').objectStore('transaksi_offline').add(txData);
             
-            // FITUR BARU: Menyimpan riwayat ke penyimpanan permanen HP (Maksimal 50)
             riwayatLokal.push(txData);
             if(riwayatLokal.length > 50) riwayatLokal.shift(); 
             localStorage.setItem('riwayat_kasir_lokal', JSON.stringify(riwayatLokal));
@@ -239,6 +241,7 @@
                     if (res.ok || res.type === 'opaque') {
                         const txHapus = db.transaction(['transaksi_offline'], 'readwrite').objectStore('transaksi_offline');
                         arr.forEach(t => txHapus.delete(t.id_transaksi));
+                        tarikMasterData(); // Jalankan ulang unduh riwayat agar sinkronisasi real-time instan
                     }
                 } catch(err) { console.log("Gagal sinkron, ditahan di memori lokal HP."); }
             };
