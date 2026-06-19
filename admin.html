@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans h-screen flex overflow-hidden">
+
+    <div id="login-admin-screen" class="fixed inset-0 bg-gray-900 z-50 flex flex-col justify-center items-center">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-80 text-center">
+            <h2 class="text-2xl font-bold mb-2 text-blue-600">PANEL OWNER</h2>
+            <p class="text-sm text-gray-500 mb-6" id="status-koneksi">Mengunduh keamanan...</p>
+            <input type="password" id="pin-admin" readonly class="w-full text-center text-3xl font-bold tracking-widest p-3 border rounded-xl bg-gray-50 mb-6 focus:outline-none">
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="tekanPin('1')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">1</button>
+                <button onclick="tekanPin('2')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">2</button>
+                <button onclick="tekanPin('3')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">3</button>
+                <button onclick="tekanPin('4')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">4</button>
+                <button onclick="tekanPin('5')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">5</button>
+                <button onclick="tekanPin('6')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">6</button>
+                <button onclick="tekanPin('7')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">7</button>
+                <button onclick="tekanPin('8')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">8</button>
+                <button onclick="tekanPin('9')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">9</button>
+                <button onclick="bersihkanPin()" class="bg-red-100 text-red-600 text-sm font-bold p-4 rounded-xl">C</button>
+                <button onclick="tekanPin('0')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">0</button>
+                <button onclick="verifikasiOwner()" class="bg-blue-600 text-white text-sm font-bold p-4 rounded-xl">OK</button>
+            </div>
+            <a href="./index.html" class="block mt-6 text-sm text-blue-500 underline">Ke Layar Kasir</a>
+        </div>
+    </div>
+
+    <aside class="w-64 bg-gray-900 text-white flex flex-col hidden md:flex">
+        <div class="p-6 text-center border-b border-gray-800"><h1 class="text-2xl font-bold text-blue-400">ADMIN POS</h1></div>
+        <nav class="flex-1 p-4 space-y-2"><a href="./index.html" class="block px-4 py-3 bg-gray-800 rounded-lg text-center font-bold">🏪 Layar Kasir</a></nav>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto p-6 md:p-10">
+        <header class="flex justify-between mb-8"><h2 class="text-3xl font-bold">Ringkasan Bisnis</h2><button onclick="muatDataLaporan(); muatKatalog();" class="bg-blue-100 text-blue-600 px-4 py-2 rounded-lg font-bold">🔄 Refresh Data</button></header>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-2xl border"><p class="text-sm font-semibold mb-1">Total Omset</p><h3 id="txt-omset" class="text-3xl font-black">Rp 0</h3></div>
+            <div class="bg-white p-6 rounded-2xl border"><p class="text-sm font-semibold mb-1">Total Modal (HPP)</p><h3 id="txt-hpp" class="text-3xl font-black text-red-500">Rp 0</h3></div>
+            <div class="bg-blue-600 p-6 rounded-2xl text-white"><p class="text-sm font-semibold mb-1">Laba Bersih</p><h3 id="txt-laba" class="text-3xl font-black">Rp 0</h3></div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+            <div class="lg:col-span-2 bg-white p-6 rounded-2xl border"><h3 class="font-bold mb-6">Grafik Penjualan 7 Hari</h3><div class="w-full h-72"><canvas id="salesChart"></canvas></div></div>
+            <div class="bg-white p-6 rounded-2xl border"><h3 class="font-bold mb-6">🏆 Kinerja Kasir</h3><ul id="list-kinerja-kasir" class="space-y-4"><p class="text-gray-400 text-sm">Belum ada transaksi.</p></ul></div>
+        </div>
+
+        <header class="flex justify-between mb-4"><h2 class="text-2xl font-bold">Riwayat Transaksi Terakhir</h2></header>
+        <div class="bg-white rounded-2xl border overflow-hidden mb-10">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-gray-50 border-b">
+                    <tr><th class="p-4">Waktu</th><th class="p-4">ID Transaksi</th><th class="p-4">Staf Kasir</th><th class="p-4">Total</th><th class="p-4 text-center">Aksi</th></tr>
+                </thead>
+                <tbody id="tabel-riwayat-body" class="divide-y divide-gray-100">
+                    <tr><td colspan="5" class="p-4 text-center text-gray-400">Memuat riwayat...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <header class="flex justify-between mb-4"><h2 class="text-2xl font-bold">Katalog Produk</h2><div class="flex gap-2"><button onclick="toggleModal('modal-tambah-produk')" class="bg-blue-600 text-white px-4 py-2 rounded">Produk Baru</button><button onclick="toggleModal('modal-tambah-stok')" class="bg-green-500 text-white px-4 py-2 rounded">Stok Masuk</button></div></header>
+        <div class="bg-white rounded-2xl border overflow-hidden pb-20"><table class="w-full text-left text-sm"><thead class="bg-gray-50 border-b"><tr><th class="p-4">SKU</th><th class="p-4">Nama</th><th class="p-4">Harga Jual</th><th class="p-4">HPP</th><th class="p-4">Stok</th></tr></thead><tbody id="tabel-produk-body"></tbody></table></div>
+    </main>
+
+    <div id="modal-tambah-produk" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50"><div class="bg-white p-6 rounded-2xl w-96"><h3 class="font-bold mb-4">Produk Baru</h3><input id="inp-sku" placeholder="SKU" class="w-full p-2 border mb-2"><input id="inp-nama" placeholder="Nama" class="w-full p-2 border mb-2"><div class="flex gap-2 mb-2"><input id="inp-kategori" placeholder="Kategori" class="w-1/2 p-2 border"><input id="inp-satuan" placeholder="Satuan" class="w-1/2 p-2 border"></div><input type="number" id="inp-harga" placeholder="Harga Jual" class="w-full p-2 border mb-4"><div class="flex gap-2"><button onclick="toggleModal('modal-tambah-produk')" class="w-1/2 border py-2 rounded">Batal</button><button onclick="simpanProdukBaru()" class="w-1/2 bg-blue-600 text-white py-2 rounded">Simpan</button></div></div></div>
+    <div id="modal-tambah-stok" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50"><div class="bg-white p-6 rounded-2xl w-96"><h3 class="font-bold mb-4">Stok Masuk</h3><input id="stok-sku" placeholder="SKU" class="w-full p-2 border mb-2"><div class="flex gap-2 mb-2"><input type="number" id="stok-qty" placeholder="Qty" class="w-1/3 p-2 border"><input type="number" id="stok-harga-beli" placeholder="Harga Satuan" class="w-2/3 p-2 border"></div><input id="stok-supplier" placeholder="Supplier" class="w-full p-2 border mb-4"><div class="flex gap-2"><button onclick="toggleModal('modal-tambah-stok')" class="w-1/2 border py-2 rounded">Batal</button><button onclick="simpanStokMasuk()" class="w-1/2 bg-green-500 text-white py-2 rounded">Proses</button></div></div></div>
+    
+    <div id="modal-detail-trx" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50">
+        <div class="bg-white p-6 rounded-2xl w-96 flex flex-col max-h-[90vh]">
+            <h3 class="font-bold text-lg mb-2 border-b pb-2">Detail Transaksi</h3>
+            <div id="detail-trx-content" class="overflow-y-auto flex-1 text-sm space-y-2 mb-4"></div>
+            <button onclick="toggleModal('modal-detail-trx')" class="w-full bg-gray-200 py-2 rounded font-bold hover:bg-gray-300">Tutup</button>
+        </div>
+    </div>
+
+       <script>
+        const URL_GAS = "https://script.google.com/macros/s/AKfycbyJ-Whc2-BmYpH9p30HLXUCvnWjn90eV9kSBgfwISz8kY7Vi0A-EUkxM1cPVaZxQ9f9/exec"; 
+        
+        let chartInstance;
+        let DB_OWNER = {}; 
+        let RIWAYAT_GLOBAL = []; 
+
+        function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
+        function tekanPin(n) { document.getElementById('pin-admin').value += n; }
+        function bersihkanPin() { document.getElementById('pin-admin').value = ""; }
+
+        async function initKeamanan() {
+            try {
+                const res = await (await fetch(URL_GAS + "?action=get_master_data")).json();
+                if(res.status === "success") {
+                    res.pengguna.forEach(u => { if(u.Peran && (u.Peran.toLowerCase() === 'owner' || u.Peran.toLowerCase() === 'admin')) DB_OWNER[u.PIN] = u.Nama; });
+                    document.getElementById('status-koneksi').innerText = "Masukkan PIN Anda";
+                }
+            } catch(e) { document.getElementById('status-koneksi').innerText = "Gagal terhubung."; }
+        }
+
+        function verifikasiOwner() {
+            if (DB_OWNER[document.getElementById('pin-admin').value]) {
+                document.getElementById('login-admin-screen').classList.add('hidden'); 
+                muatDataLaporan(); muatKatalog();
+            } else { alert("Akses Ditolak!"); bersihkanPin(); }
+        }
+
+        async function muatDataLaporan() {
+            document.getElementById('txt-omset').innerText = "Memuat...";
+            const tbRiwayat = document.getElementById('tabel-riwayat-body');
+            try {
+                const response = await fetch(URL_GAS + "?action=get_laporan");
+                const res = await response.json();
+                
+                if(res.status === "error") {
+                    alert("Error Server: " + res.message);
+                    tbRiwayat.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-500">${res.message}</td></tr>`;
+                    return;
+                }
+
+                if(res.status === "success") {
+                    document.getElementById('txt-omset').innerText = "Rp " + res.omset.toLocaleString('id-ID');
+                    document.getElementById('txt-hpp').innerText = "Rp " + res.hpp.toLocaleString('id-ID');
+                    document.getElementById('txt-laba').innerText = "Rp " + res.laba.toLocaleString('id-ID');
+                    
+                    if(chartInstance) chartInstance.destroy();
+                    chartInstance = new Chart(document.getElementById('salesChart').getContext('2d'), { type: 'line', data: { labels: ['Sen','Sel','Rab','Kam','Jum','Sab','Min'], datasets: [{ label: 'Omset', data: res.grafik, borderColor: '#2563eb', tension: 0.4, fill: true, backgroundColor: 'rgba(37,99,235,0.1)' }] } });
+
+                    const listKasir = document.getElementById('list-kinerja-kasir'); listKasir.innerHTML = "";
+                    if(res.kinerja_kasir && res.kinerja_kasir.length > 0) {
+                        res.kinerja_kasir.sort((a,b) => b.total - a.total).forEach(k => {
+                            listKasir.innerHTML += `<li class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border"><div class="flex items-center gap-3"><div class="bg-blue-100 text-blue-600 font-bold p-2 rounded-full w-10 h-10 flex items-center justify-center">${k.nama.charAt(0)}</div><span class="font-bold text-gray-700">${k.nama}</span></div><span class="font-black text-gray-800">Rp ${k.total.toLocaleString('id-ID')}</span></li>`;
+                        });
+                    } else {
+                        listKasir.innerHTML = `<p class="text-gray-400 text-sm">Belum ada transaksi.</p>`;
+                    }
+
+                    // Perbaikan Render Tabel Riwayat Transaksi Aman
+                    RIWAYAT_GLOBAL = res.riwayat_transaksi || [];
+                    tbRiwayat.innerHTML = "";
+                    if(RIWAYAT_GLOBAL.length === 0) { 
+                        tbRiwayat.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">Belum ada transaksi di database.</td></tr>`; 
+                    } else {
+                        RIWAYAT_GLOBAL.forEach(trx => {
+                            let tglStr = "Tanggal Invalid";
+                            if(trx.tanggal) {
+                                let d = new Date(trx.tanggal);
+                                if(!isNaN(d.getTime())) tglStr = d.toLocaleString('id-ID');
+                            }
+                            tbRiwayat.innerHTML += `
+                            <tr class="hover:bg-blue-50 transition">
+                                <td class="p-4 text-xs text-gray-500">${tglStr}</td>
+                                <td class="p-4 font-bold text-gray-800">${trx.id_transaksi}</td>
+                                <td class="p-4"><span class="bg-gray-100 border text-gray-600 px-2 py-1 rounded text-xs">${trx.kasir}</span></td>
+                                <td class="p-4 font-bold text-brand">Rp ${(Number(trx.total_bayar)||0).toLocaleString('id-ID')}</td>
+                                <td class="p-4 text-center"><button onclick="lihatDetailTrx('${trx.id_transaksi}')" class="bg-blue-100 text-blue-600 px-3 py-1 rounded text-xs font-bold hover:bg-blue-200">Rincian</button></td>
+                            </tr>`;
+                        });
+                    }
+                }
+            } catch(e) { 
+                console.error(e);
+                document.getElementById('txt-omset').innerText = "Rp 0"; 
+                tbRiwayat.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-500">Gagal memuat JSON. Pastikan Deploy Apps Script sudah benar.</td></tr>`;
+            }
+        }
+
+        function lihatDetailTrx(idTrx) {
+            const trx = RIWAYAT_GLOBAL.find(t => t.id_transaksi === idTrx);
+            if(!trx) return;
+            const c = document.getElementById('detail-trx-content');
+            let itemStr = (trx.items || []).map(i => `<div class="flex justify-between text-gray-600"><span>${i.qty}x ${i.nama}</span><span>Rp ${(Number(i.subtotal)||0).toLocaleString('id-ID')}</span></div>`).join('');
+            
+            let tglStr = "Tanggal Invalid";
+            if(trx.tanggal) {
+                let d = new Date(trx.tanggal);
+                if(!isNaN(d.getTime())) tglStr = d.toLocaleString('id-ID');
+            }
+
+            c.innerHTML = `
+                <div class="mb-3">
+                    <p class="text-xs text-gray-500">No. Nota:</p><p class="font-bold">${trx.id_transaksi}</p>
+                    <p class="text-xs text-gray-500 mt-2">Waktu:</p><p class="font-bold">${tglStr}</p>
+                    <p class="text-xs text-gray-500 mt-2">Staf Kasir:</p><p class="font-bold text-blue-600">${trx.kasir}</p>
+                </div>
+                <div class="border-t border-b py-2 my-2 space-y-1 bg-gray-50 p-2 rounded">${itemStr}</div>
+                <div class="flex justify-between font-bold text-lg mt-2 text-gray-800"><span>TOTAL BAYAR</span><span class="text-brand">Rp ${(Number(trx.total_bayar)||0).toLocaleString('id-ID')}</span></div>
+            `;
+            toggleModal('modal-detail-trx');
+        }
+
+        async function muatKatalog() {
+            try {
+                const res = await (await fetch(URL_GAS + "?action=get_master_data")).json();
+                const tb = document.getElementById('tabel-produk-body'); tb.innerHTML = "";
+                res.produk.forEach(p => { tb.innerHTML += `<tr class="border-b hover:bg-gray-50"><td class="p-4">${p.SKU}</td><td class="p-4 font-bold">${p.Nama}</td><td class="p-4">Rp ${Number(p.Harga_Jual).toLocaleString('id-ID')}</td><td class="p-4 text-gray-500">Rp ${(Number(p.HPP)||0).toLocaleString('id-ID')}</td><td class="p-4 font-bold text-blue-600">${p.Stok_Sekarang||0}</td></tr>`; });
+            } catch(e){}
+        }
+
+        async function simpanProdukBaru() {
+            const data = { sku: document.getElementById('inp-sku').value, nama: document.getElementById('inp-nama').value, kategori: document.getElementById('inp-kategori').value, satuan: document.getElementById('inp-satuan').value, harga_jual: parseInt(document.getElementById('inp-harga').value), hpp: 0, stok_awal: 0 };
+            toggleModal('modal-tambah-produk'); await fetch(URL_GAS, { method: 'POST', body: JSON.stringify({ action: "tambah_produk_baru", data: data }) }); muatKatalog();
+        }
+
+        async function simpanStokMasuk() {
+            const data = { sku: document.getElementById('stok-sku').value, qty: parseInt(document.getElementById('stok-qty').value), harga_beli: parseInt(document.getElementById('stok-harga-beli').value), supplier: document.getElementById('stok-supplier').value };
+            toggleModal('modal-tambah-stok'); await fetch(URL_GAS, { method: 'POST', body: JSON.stringify({ action: "tambah_stok_supplier", data: data }) }); muatKatalog();
+        }
+
+        initKeamanan();
+    </script>
+
+</body>
+</html>

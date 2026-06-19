@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Kasir Pintar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <link rel="manifest" href="./manifest.json">
+    <style>
+        :root { --color-primary: #2563eb; }
+        .bg-brand { background-color: var(--color-primary); }
+        .text-brand { color: var(--color-primary); }
+        .border-brand { border-color: var(--color-primary); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen overflow-hidden flex flex-col font-sans">
+
+    <div id="login-screen" class="fixed inset-0 bg-brand z-50 flex flex-col justify-center items-center">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-80 text-center">
+            <h2 class="text-2xl font-bold mb-2 text-gray-800">POS KASIR</h2>
+            <input type="password" id="pin-input" readonly class="w-full text-center text-3xl font-bold tracking-widest p-3 border rounded-xl bg-gray-50 mb-6 focus:outline-none">
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="tekanPin('1')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">1</button>
+                <button onclick="tekanPin('2')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">2</button>
+                <button onclick="tekanPin('3')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">3</button>
+                <button onclick="tekanPin('4')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">4</button>
+                <button onclick="tekanPin('5')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">5</button>
+                <button onclick="tekanPin('6')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">6</button>
+                <button onclick="tekanPin('7')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">7</button>
+                <button onclick="tekanPin('8')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">8</button>
+                <button onclick="tekanPin('9')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">9</button>
+                <button onclick="bersihkanPin()" class="bg-red-100 text-red-600 text-sm font-bold p-4 rounded-xl">C</button>
+                <button onclick="tekanPin('0')" class="bg-gray-200 text-xl font-bold p-4 rounded-xl">0</button>
+                <button onclick="verifikasiPin()" class="bg-green-500 text-white text-sm font-bold p-4 rounded-xl">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <header class="bg-brand text-white px-4 py-3 flex justify-between items-center shadow-md">
+        <div><h1 class="text-xl font-bold">POS KASIR</h1><p class="text-xs">Kasir: <span id="nama-kasir">-</span></p></div>
+        <div class="flex gap-3 items-center">
+            <span id="sync-status" class="text-xs bg-green-400 px-2 py-1 rounded-full text-black font-semibold">Online</span>
+            <button onclick="bukaRiwayat()" class="bg-black bg-opacity-20 text-xs px-2 py-1 rounded hover:bg-opacity-40 transition">📜 Riwayat</button>
+            <button onclick="hubungkanPrinter()" id="status-printer" class="bg-black bg-opacity-20 text-xs px-2 py-1 rounded hover:bg-opacity-40 transition">🖨️ Printer</button>
+            <button onclick="window.location.href='./admin.html'" class="bg-yellow-400 text-yellow-900 text-xs px-3 py-1 rounded font-bold hover:bg-yellow-500 transition shadow-sm">👑 Owner</button>
+            <button onclick="lockScreen()" class="bg-red-500 text-xs px-3 py-1 rounded font-bold hover:bg-red-600 transition shadow-sm">Kunci</button>
+        </div>
+    </header>
+
+    <main class="flex flex-1 overflow-hidden flex-col lg:flex-row">
+        <section class="flex-1 p-4 overflow-y-auto lg:w-2/3">
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="search-product" placeholder="Cari Produk / Barcode..." class="flex-1 p-3 rounded-xl border focus:ring-2 focus:ring-brand">
+                <button onclick="bukaScanner()" class="bg-white text-brand border border-brand font-bold px-4 rounded-xl shadow-sm">📷 Scan</button>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" id="container-produk"></div>
+        </section>
+
+        <aside class="w-full lg:w-96 bg-white shadow-xl border-l flex flex-col h-full z-10">
+            <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
+                <h2 class="font-bold">Daftar Belanja</h2>
+                <button onclick="toggleModal('modal-open-bill')" class="text-xs text-brand border border-brand px-2 py-1 rounded">+ Open Bill</button>
+            </div>
+            <div id="open-bill-indicator" class="hidden bg-amber-50 px-4 py-2 text-xs text-amber-700 flex justify-between border-b">
+                <span>Bon: <strong id="lbl-pelanggan"></strong></span><button onclick="batalOpenBill()" class="text-red-500">X</button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 space-y-3" id="cart-items"></div>
+            <div class="p-4 border-t bg-gray-50 space-y-2">
+                <div class="flex justify-between items-center text-sm"><span>Diskon:</span><input type="number" id="input-diskon" value="0" oninput="hitungTotal()" class="w-24 p-1 border text-right rounded"></div>
+                <div class="flex justify-between items-center text-sm"><span>Metode:</span>
+                    <select id="select-payment" class="p-1 border rounded bg-white w-24"><option>Tunai</option><option>QRIS</option><option>Transfer</option></select>
+                </div>
+                <div class="flex justify-between font-bold text-xl pt-2 border-t"><span>Total:</span><span id="txt-total">Rp 0</span></div>
+                <button onclick="selesaikanTransaksi('Closed')" class="w-full bg-green-500 text-white font-bold py-3 rounded-xl shadow-md mt-2">Bayar</button>
+            </div>
+        </aside>
+    </main>
+
+    <div id="modal-scanner" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex justify-center items-center"><div class="bg-white p-4 rounded-xl w-11/12 max-w-md"><div class="flex justify-between mb-4"><h3 class="font-bold">Kamera Barcode</h3><button onclick="tutupScanner()" class="text-red-500 bg-red-100 px-3 py-1 rounded">X</button></div><div id="reader"></div></div></div>
+    <div id="modal-open-bill" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden flex justify-center items-center"><div class="bg-white p-6 rounded-xl w-80"><h3 class="font-bold mb-4">Simpan Bon</h3><input type="text" id="ob-pelanggan" placeholder="Nama Pelanggan" class="w-full p-2 border rounded mb-3"><input type="text" id="ob-meja" placeholder="Nomor Meja" class="w-full p-2 border rounded mb-4"><div class="flex gap-2"><button onclick="toggleModal('modal-open-bill')" class="w-1/2 border py-2 rounded">Batal</button><button onclick="simpanSebagaiOpenBill()" class="w-1/2 bg-brand text-white py-2 rounded">Simpan</button></div></div></div>
+    
+    <div id="modal-riwayat" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex justify-center items-center"><div class="bg-white p-6 rounded-xl w-11/12 max-w-md h-[80vh] flex flex-col"><div class="flex justify-between mb-4 border-b pb-2"><h3 class="font-bold text-lg">Riwayat Kasir Lokal</h3><button onclick="toggleModal('modal-riwayat')" class="text-red-500 font-bold">X</button></div><div class="flex-1 overflow-y-auto space-y-3 pr-2" id="list-riwayat"></div></div></div>
+
+    <script>
+        const URL_GAS = "https://script.google.com/macros/s/AKfycbyJ-Whc2-BmYpH9p30HLXUCvnWjn90eV9kSBgfwISz8kY7Vi0A-EUkxM1cPVaZxQ9f9/exec"; 
+        
+        let USER_DB = { "1234": "Owner" };
+        let PRODUCT_DB = [];
+        let kasirAktif = "", keranjang = [], infoOpenBill = null, riwayatLokal = [];
+
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');
+        
+        let db;
+        const request = indexedDB.open('POS_Database', 1);
+        request.onupgradeneeded = (e) => { db = e.target.result; if (!db.objectStoreNames.contains('transaksi_offline')) db.createObjectStore('transaksi_offline', { keyPath: 'id_transaksi' }); };
+        request.onsuccess = (e) => { db = e.target.result; cekStatusInternet(); tarikMasterData(); };
+
+        function cekStatusInternet() {
+            const b = document.getElementById('sync-status');
+            if (navigator.onLine) { b.innerText = "Online"; b.className = "text-xs bg-green-400 px-2 py-1 rounded-full text-black"; syncDataKeSheets(); } 
+            else { b.innerText = "Offline"; b.className = "text-xs bg-red-500 px-2 py-1 rounded-full text-white"; }
+        }
+        window.addEventListener('online', cekStatusInternet); window.addEventListener('offline', cekStatusInternet);
+
+        async function tarikMasterData() {
+            if(!navigator.onLine) return; 
+            try {
+                const res = await fetch(URL_GAS + "?action=get_master_data");
+                const data = await res.json();
+                if(data.status === "success") {
+                    PRODUCT_DB = data.produk;
+                    data.pengguna.forEach(u => USER_DB[u.PIN] = u.Nama);
+                    if(kasirAktif) inisialisasiKatalog();
+                }
+            } catch(e) {}
+        }
+
+        function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
+        function tekanPin(n) { document.getElementById('pin-input').value += n; }
+        function bersihkanPin() { document.getElementById('pin-input').value = ""; }
+        function lockScreen() { document.getElementById('login-screen').classList.remove('hidden'); bersihkanPin(); }
+        function verifikasiPin() {
+            const pin = document.getElementById('pin-input').value;
+            if (USER_DB[pin]) { kasirAktif = USER_DB[pin]; document.getElementById('nama-kasir').innerText = kasirAktif; document.getElementById('login-screen').classList.add('hidden'); inisialisasiKatalog(); } 
+            else { alert("PIN salah!"); bersihkanPin(); }
+        }
+
+        function inisialisasiKatalog() {
+            const c = document.getElementById('container-produk'); c.innerHTML = "";
+            PRODUCT_DB.forEach(p => {
+                const hargaTampil = parseInt(p.Harga_Jual.toString().replace(/[^0-9]/g, '')) || 0;
+                c.innerHTML += `<div onclick="tambahKeKeranjang('${p.SKU}')" class="bg-white p-4 rounded-xl border cursor-pointer hover:border-brand"><span class="text-[10px] text-gray-400">${p.Kategori}</span><h4 class="font-bold text-sm truncate">${p.Nama}</h4><span class="text-brand font-bold text-sm block mt-2">Rp ${hargaTampil.toLocaleString('id-ID')}</span></div>`;
+            });
+        }
+
+        function tambahKeKeranjang(sku) {
+            const p = PRODUCT_DB.find(x => x.SKU === sku);
+            const item = keranjang.find(x => x.sku === sku);
+            const hargaBersih = parseInt(p.Harga_Jual.toString().replace(/[^0-9]/g, '')) || 0;
+            if (item) { item.qty++; item.subtotal = item.qty * hargaBersih; } else { keranjang.push({ sku: p.SKU, nama: p.Nama, qty: 1, harga: hargaBersih, subtotal: hargaBersih }); }
+            renderKeranjang();
+        }
+
+        function renderKeranjang() {
+            const c = document.getElementById('cart-items'); c.innerHTML = keranjang.length ? '' : '<p class="text-center text-gray-400 mt-10">Kosong</p>';
+            keranjang.forEach((i, idx) => { c.innerHTML += `<div class="flex justify-between items-center bg-gray-50 p-2 border rounded"><div><h5 class="font-bold text-xs">${i.nama}</h5><span class="text-[11px] text-gray-500">${i.qty} x Rp ${parseInt(i.harga).toLocaleString('id-ID')}</span></div><div class="flex gap-2"><span class="font-bold text-xs">Rp ${parseInt(i.subtotal).toLocaleString('id-ID')}</span><button onclick="hapusItem(${idx})" class="text-red-500 text-xs font-bold px-1">X</button></div></div>`; });
+            hitungTotal();
+        }
+        
+        function hapusItem(idx) { keranjang.splice(idx, 1); renderKeranjang(); }
+        
+        function hitungTotal() {
+            const sub = keranjang.reduce((s, i) => s + parseInt(i.subtotal), 0);
+            const dsk = parseInt(document.getElementById('input-diskon').value.toString().replace(/[^0-9]/g, '')) || 0;
+            document.getElementById('txt-total').innerText = "Rp " + Math.max(0, sub - dsk).toLocaleString('id-ID');
+        }
+
+        document.getElementById('search-product').addEventListener('input', e => {
+            const k = e.target.value.toLowerCase();
+            Array.from(document.getElementById('container-produk').children).forEach(el => el.style.display = el.innerText.toLowerCase().includes(k) ? "block" : "none");
+        });
+
+        function simpanSebagaiOpenBill() {
+            const n = document.getElementById('ob-pelanggan').value; if(!n) return alert("Isi nama!");
+            infoOpenBill = { nama_pelanggan: n, no_meja: document.getElementById('ob-meja').value };
+            document.getElementById('lbl-pelanggan').innerText = n; document.getElementById('open-bill-indicator').classList.remove('hidden');
+            toggleModal('modal-open-bill'); selesaikanTransaksi('Open');
+        }
+        function batalOpenBill() { infoOpenBill = null; document.getElementById('open-bill-indicator').classList.add('hidden'); }
+
+        function selesaikanTransaksi(st) {
+            if (keranjang.length === 0) return alert("Keranjang kosong!");
+            const dsk = parseInt(document.getElementById('input-diskon').value.toString().replace(/[^0-9]/g, '')) || 0;
+            const sub = keranjang.reduce((s, i) => s + parseInt(i.subtotal), 0);
+            const txData = { id_transaksi: "TRX-" + Date.now(), tanggal: new Date().toISOString(), total_bayar: Math.max(0, sub - dsk), diskon_transaksi: dsk, metode_bayar: document.getElementById('select-payment').value, kasir: kasirAktif, status: st, nama_pelanggan: infoOpenBill ? infoOpenBill.nama_pelanggan : "", no_meja: infoOpenBill ? infoOpenBill.no_meja : "", items: keranjang };
+
+            if(db) db.transaction(['transaksi_offline'], 'readwrite').objectStore('transaksi_offline').add(txData);
+            riwayatLokal.push(txData); cetakStruk(txData); syncDataKeSheets();
+            
+            alert(st === 'Open' ? "Bon Disimpan!" : "Transaksi Sukses!");
+            keranjang = []; document.getElementById('input-diskon').value = 0; batalOpenBill(); renderKeranjang();
+        }
+
+        async function syncDataKeSheets() {
+            if (!navigator.onLine || !db) return;
+            const store = db.transaction(['transaksi_offline'], 'readonly').objectStore('transaksi_offline');
+            
+            store.getAll().onsuccess = async (e) => {
+                const arr = e.target.result; 
+                if (arr.length === 0) return;
+                
+                try {
+                    const res = await fetch(URL_GAS, { 
+                        method: 'POST', 
+                        body: JSON.stringify({ action: "sync_transaksi", data: arr }) 
+                    });
+                    
+                    if (res.ok || res.type === 'opaque') {
+                        const txHapus = db.transaction(['transaksi_offline'], 'readwrite').objectStore('transaksi_offline');
+                        arr.forEach(t => txHapus.delete(t.id_transaksi));
+                    }
+                } catch(err) {
+                    console.log("Gagal sinkron, ditahan di HP:", err);
+                }
+            };
+        }
+
+        let html5QrcodeScanner;
+        function bukaScanner() { toggleModal('modal-scanner'); html5QrcodeScanner = new Html5Qrcode("reader"); html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (txt) => { const p = PRODUCT_DB.find(x => x.SKU == txt); if (p) { tambahKeKeranjang(p.SKU); tutupScanner(); } else alert("Barcode tak ditemukan"); }).catch(e=>{}); }
+        function tutupScanner() { toggleModal('modal-scanner'); if (html5QrcodeScanner) html5QrcodeScanner.stop().then(()=>html5QrcodeScanner.clear()); }
+
+        let printerServer;
+        async function hubungkanPrinter() { try { printerServer = await (await navigator.bluetooth.requestDevice({ filters: [{ services: ['000018f0-0000-1000-8000-00805f9b34fb'] }], optionalServices: ['e7810a71-73ae-499d-8c15-faa9aef0c3f2'] })).gatt.connect(); document.getElementById('status-printer').innerText = "🖨️ " + printerServer.device.name; alert("Printer terhubung!"); } catch (err) {} }
+        
+        async function cetakStruk(tx) {
+            if (!printerServer || !printerServer.connected) return;
+            try {
+                const char = await (await printerServer.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb')).getCharacteristic('00002af1-0000-1000-8000-00805f9b34fb');
+                let t = `\x1B\x61\x01POS KASIR\n--------------------------\n\x1B\x61\x00No: ${tx.id_transaksi}\nKasir: ${tx.kasir}\n--------------------------\n`;
+                tx.items.forEach(i => t += `${i.nama}\n${i.qty} x ${i.harga}   Rp ${i.subtotal}\n`);
+                t += `--------------------------\nTOTAL: Rp ${tx.total_bayar}\n\n\n`;
+                const b = new TextEncoder().encode(t);
+                for (let i = 0; i < b.length; i += 512) await char.writeValue(b.slice(i, i + 512));
+            } catch(e){}
+        }
+
+        function bukaRiwayat() {
+            toggleModal('modal-riwayat'); 
+            const c = document.getElementById('list-riwayat'); 
+            c.innerHTML = riwayatLokal.length === 0 ? '<p class="text-center text-gray-400 mt-10">Belum ada transaksi</p>' : '';
+            
+            [...riwayatLokal].reverse().forEach(trx => {
+                let rincianBarang = trx.items.map(i => `<div class="flex justify-between text-xs text-gray-500"><span>${i.qty}x ${i.nama}</span><span>Rp ${i.subtotal.toLocaleString('id-ID')}</span></div>`).join('');
+                
+                c.innerHTML += `
+                <div class="border rounded-xl p-4 shadow-sm bg-gray-50">
+                    <div class="flex justify-between border-b border-gray-200 pb-2 mb-2">
+                        <div>
+                            <span class="font-bold text-gray-800">${trx.id_transaksi}</span>
+                            <p class="text-[10px] text-gray-400">${new Date(trx.tanggal).toLocaleString('id-ID')} | Kasir: ${trx.kasir}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-black text-brand text-sm">Rp ${trx.total_bayar.toLocaleString('id-ID')}</span>
+                            <p class="text-[10px] text-gray-500">${trx.metode_bayar}</p>
+                        </div>
+                    </div>
+                    <div class="space-y-1 mb-3">
+                        ${rincianBarang}
+                    </div>
+                    <button onclick='cetakStruk(${JSON.stringify(trx)})' class="w-full bg-blue-100 text-blue-700 font-bold py-2 rounded-lg text-xs hover:bg-blue-200 transition">🖨️ Cetak Ulang Struk</button>
+                </div>`;
+            });
+        }
+    </script>
+</body>
+</html>
