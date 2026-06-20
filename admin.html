@@ -18,7 +18,6 @@
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans h-screen flex flex-col md:flex-row overflow-hidden">
 
-    <!-- LAYAR LOGIN ADMIN -->
     <div id="login-admin-screen" class="fixed inset-0 bg-gray-900 z-50 flex flex-col justify-center items-center p-4">
         <div class="bg-white p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center">
             <h2 class="text-2xl font-bold mb-2 text-brand nama-toko-display">PANEL OWNER</h2>
@@ -43,19 +42,16 @@
         </div>
     </div>
 
-    <!-- HEADER KHUSUS HP -->
     <header class="md:hidden bg-gray-900 text-white p-4 flex justify-between items-center shadow-md shrink-0 border-b border-gray-800">
         <h1 class="text-lg font-bold text-brand nama-toko-display">ADMIN POS</h1>
         <a href="./index.html" class="bg-gray-800 px-3 py-2 rounded-lg text-xs font-bold border border-gray-700">🏪 Ke Kasir</a>
     </header>
 
-    <!-- SIDEBAR PC -->
     <aside class="w-64 bg-gray-900 text-white flex-col hidden md:flex shrink-0 border-r border-gray-800">
         <div class="p-6 text-center border-b border-gray-800"><h1 class="text-2xl font-bold text-brand nama-toko-display">ADMIN POS</h1></div>
         <nav class="flex-1 p-4 space-y-2"><a href="./index.html" class="block px-4 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg text-center font-bold transition">🏪 Layar Kasir</a></nav>
     </aside>
 
-    <!-- CONTAINER UTAMA -->
     <main class="flex-1 overflow-y-auto p-4 md:p-10 w-full">
         <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
             <h2 class="text-2xl md:text-3xl font-bold">Ringkasan Bisnis</h2>
@@ -82,7 +78,17 @@
             </div>
         </div>
 
-        <header class="flex justify-between items-center mb-4"><h2 class="text-xl md:text-2xl font-bold">Riwayat Transaksi</h2></header>
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+            <h2 class="text-xl md:text-2xl font-bold">Riwayat Transaksi</h2>
+            <div class="flex gap-2 bg-white p-1 rounded-lg border shadow-sm w-full sm:w-auto">
+                <select id="filter-kasir-export" class="text-sm border-r px-2 py-1 outline-none bg-transparent">
+                    <option value="ALL">Semua Kasir</option>
+                </select>
+                <button onclick="exportExcelAdmin()" class="bg-green-100 text-green-700 px-3 py-1.5 rounded text-xs font-bold hover:bg-green-200">📊 Excel</button>
+                <button onclick="cetakPDFAdmin()" class="bg-red-100 text-red-700 px-3 py-1.5 rounded text-xs font-bold hover:bg-red-200">📄 PDF</button>
+            </div>
+        </header>
+
         <div class="bg-white rounded-xl md:rounded-2xl border shadow-sm mb-10 overflow-x-auto">
             <table class="w-full text-left text-sm whitespace-nowrap min-w-max">
                 <thead class="bg-gray-50 border-b text-gray-600">
@@ -111,7 +117,6 @@
         </div>
     </main>
 
-    <!-- MODALS PENGATURAN TOKO -->
     <div id="modal-pengaturan" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50 p-4">
         <div class="bg-white p-6 rounded-2xl w-full max-w-sm">
             <h3 class="font-bold mb-4 text-lg">⚙️ Pengaturan Toko</h3>
@@ -131,7 +136,6 @@
         </div>
     </div>
 
-    <!-- MODALS LAINNYA -->
     <div id="modal-tambah-produk" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50 p-4"><div class="bg-white p-6 rounded-2xl w-full max-w-sm"><h3 class="font-bold mb-4 text-lg">Produk Baru</h3><input id="inp-sku" placeholder="SKU" class="w-full p-2 border rounded-lg mb-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"><input id="inp-nama" placeholder="Nama" class="w-full p-2 border rounded-lg mb-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"><div class="flex gap-2 mb-2"><input id="inp-kategori" placeholder="Kategori" class="w-1/2 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"><input id="inp-satuan" placeholder="Satuan" class="w-1/2 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"></div><input type="number" id="inp-harga" placeholder="Harga Jual" class="w-full p-2 border rounded-lg mb-4 text-sm outline-none focus:ring-2 focus:ring-blue-500"><div class="flex gap-2"><button onclick="toggleModal('modal-tambah-produk')" class="w-1/2 border py-2 rounded-lg font-bold text-sm">Batal</button><button onclick="simpanProdukBaru()" class="w-1/2 bg-brand text-white py-2 rounded-lg font-bold text-sm">Simpan</button></div></div></div>
     <div id="modal-tambah-stok" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50 p-4"><div class="bg-white p-6 rounded-2xl w-full max-w-sm"><h3 class="font-bold mb-4 text-lg">Stok Masuk</h3><input id="stok-sku" placeholder="SKU" class="w-full p-2 border rounded-lg mb-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"><div class="flex gap-2 mb-2"><input type="number" id="stok-qty" placeholder="Qty" class="w-1/3 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"><input type="number" id="stok-harga-beli" placeholder="Harga Satuan" class="w-2/3 p-2 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"></div><input id="stok-supplier" placeholder="Supplier" class="w-full p-2 border rounded-lg mb-4 text-sm outline-none focus:ring-2 focus:ring-blue-500"><div class="flex gap-2"><button onclick="toggleModal('modal-tambah-stok')" class="w-1/2 border py-2 rounded-lg font-bold text-sm">Batal</button><button onclick="simpanStokMasuk()" class="w-1/2 bg-green-500 text-white py-2 rounded-lg font-bold text-sm">Proses</button></div></div></div>
     <div id="modal-detail-trx" class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-50 p-4"><div class="bg-white p-5 md:p-6 rounded-2xl w-full max-w-md flex flex-col max-h-[85vh]"><h3 class="font-bold text-lg mb-3 border-b pb-2">Detail Transaksi</h3><div id="detail-trx-content" class="overflow-y-auto flex-1 text-sm space-y-2 mb-4 pr-1"></div><button onclick="toggleModal('modal-detail-trx')" class="w-full bg-gray-200 py-2.5 rounded-lg font-bold">Tutup</button></div></div>
@@ -191,8 +195,16 @@
 
                     RIWAYAT_GLOBAL = res.riwayat_transaksi || [];
                     const tbRiwayat = document.getElementById('tabel-riwayat-body'); tbRiwayat.innerHTML = "";
-                    if(RIWAYAT_GLOBAL.length === 0) tbRiwayat.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">Belum ada transaksi.</td></tr>`; 
-                    else RIWAYAT_GLOBAL.forEach(trx => { let tglStr = "Invalid"; if(trx.tanggal) { let d = new Date(trx.tanggal); if(!isNaN(d.getTime())) tglStr = d.toLocaleString('id-ID'); } tbRiwayat.innerHTML += `<tr class="hover:bg-blue-50 transition"><td class="p-3 md:p-4 text-xs text-gray-500">${tglStr}</td><td class="p-3 md:p-4 font-bold text-gray-800 text-xs md:text-sm">${trx.id_transaksi}</td><td class="p-3 md:p-4"><span class="bg-gray-100 border text-gray-600 px-2 py-1 rounded text-[10px] md:text-xs">${trx.kasir}</span></td><td class="p-3 md:p-4 font-bold text-brand text-xs md:text-sm">Rp ${(Number(trx.total_bayar)||0).toLocaleString('id-ID')}</td><td class="p-3 md:p-4 text-center"><button onclick="lihatDetailTrx('${trx.id_transaksi}')" class="bg-blue-100 text-brand px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-200 shadow-sm">Rincian</button></td></tr>`; });
+                    
+                    if(RIWAYAT_GLOBAL.length === 0) {
+                        tbRiwayat.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">Belum ada transaksi.</td></tr>`; 
+                    } else {
+                        RIWAYAT_GLOBAL.forEach(trx => { 
+                            let tglStr = "Invalid"; if(trx.tanggal) { let d = new Date(trx.tanggal); if(!isNaN(d.getTime())) tglStr = d.toLocaleString('id-ID'); } 
+                            tbRiwayat.innerHTML += `<tr class="hover:bg-blue-50 transition"><td class="p-3 md:p-4 text-xs text-gray-500">${tglStr}</td><td class="p-3 md:p-4 font-bold text-gray-800 text-xs md:text-sm">${trx.id_transaksi}</td><td class="p-3 md:p-4"><span class="bg-gray-100 border text-gray-600 px-2 py-1 rounded text-[10px] md:text-xs">${trx.kasir}</span></td><td class="p-3 md:p-4 font-bold text-brand text-xs md:text-sm">Rp ${(Number(trx.total_bayar)||0).toLocaleString('id-ID')}</td><td class="p-3 md:p-4 text-center"><button onclick="lihatDetailTrx('${trx.id_transaksi}')" class="bg-blue-100 text-brand px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-200 shadow-sm">Rincian</button></td></tr>`; 
+                        });
+                        perbaruiFilterKasir(); // Memicu pembaruan daftar filter kasir
+                    }
                 }
             } catch(e) { document.getElementById('txt-omset').innerText = "Rp 0"; }
         }
@@ -247,6 +259,57 @@
             } catch(e) { alert("Terjadi kesalahan jaringan."); }
             
             btn.innerText = "Simpan"; toggleModal('modal-pengaturan');
+        }
+
+        // FITUR BARU: FILTER KASIR OTOMATIS
+        function perbaruiFilterKasir() {
+            const select = document.getElementById('filter-kasir-export');
+            const kasirUnik = [...new Set(RIWAYAT_GLOBAL.map(item => item.kasir))];
+            select.innerHTML = '<option value="ALL">Semua Kasir</option>';
+            kasirUnik.forEach(k => select.innerHTML += `<option value="${k}">${k}</option>`);
+        }
+
+        // FITUR BARU: EXPORT EXCEL (ADMIN)
+        function exportExcelAdmin() {
+            const filter = document.getElementById('filter-kasir-export').value;
+            const dataExport = filter === "ALL" ? RIWAYAT_GLOBAL : RIWAYAT_GLOBAL.filter(t => t.kasir === filter);
+            if(dataExport.length === 0) return alert("Tidak ada data untuk diekspor!");
+            
+            let csv = "Waktu,ID Transaksi,Kasir,Metode,Total Bayar,Item\n";
+            dataExport.forEach(trx => {
+                let tgl = new Date(trx.tanggal).toLocaleString('id-ID');
+                let itemStr = (trx.items || []).map(i => `${i.qty}x ${i.nama}`).join(" + ").replace(/"/g, '""');
+                csv += `"${tgl}","${trx.id_transaksi}","${trx.kasir}","${trx.metode_bayar}","${trx.total_bayar}","${itemStr}"\n`;
+            });
+            const link = document.createElement("a");
+            link.href = encodeURI("data:text/csv;charset=utf-8," + csv);
+            link.download = `Laporan_Admin_${filter}_${new Date().toLocaleDateString('id-ID')}.csv`;
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+
+        // FITUR BARU: CETAK PDF (ADMIN)
+        function cetakPDFAdmin() {
+            const filter = document.getElementById('filter-kasir-export').value;
+            const dataExport = filter === "ALL" ? RIWAYAT_GLOBAL : RIWAYAT_GLOBAL.filter(t => t.kasir === filter);
+            if(dataExport.length === 0) return alert("Tidak ada data untuk dicetak!");
+            
+            let w = window.open('', '', 'height=650,width=900');
+            w.document.write('<html><head><title>Laporan Global Admin</title>');
+            w.document.write('<style>body{font-family:sans-serif;} table{width:100%;border-collapse:collapse;margin-top:20px;font-size:12px;} th,td{border:1px solid #ddd;padding:8px;text-align:left;} th{background-color:#f4f4f4;} .text-right{text-align:right;}</style></head><body>');
+            w.document.write(`<h2>Laporan Transaksi Admin (${filter === "ALL" ? "Semua Staf" : "Kasir: " + filter})</h2><p>Dicetak: ${new Date().toLocaleString('id-ID')}</p>`);
+            w.document.write('<table><thead><tr><th>Waktu</th><th>ID Transaksi</th><th>Kasir</th><th>Metode</th><th>Items</th><th>Total</th></tr></thead><tbody>');
+            
+            let total = 0;
+            dataExport.forEach(trx => {
+                total += trx.total_bayar;
+                let tgl = new Date(trx.tanggal).toLocaleString('id-ID');
+                let itemStr = (trx.items || []).map(i => `${i.qty}x ${i.nama}`).join("<br>");
+                w.document.write(`<tr><td>${tgl}</td><td>${trx.id_transaksi}</td><td>${trx.kasir}</td><td>${trx.metode_bayar}</td><td>${itemStr}</td><td class="text-right">Rp ${trx.total_bayar.toLocaleString('id-ID')}</td></tr>`);
+            });
+            
+            w.document.write(`</tbody><tfoot><tr><th colspan="5" class="text-right">TOTAL PENDAPATAN:</th><th class="text-right">Rp ${total.toLocaleString('id-ID')}</th></tr></tfoot></table>`);
+            w.document.write('</body></html>');
+            w.document.close(); w.focus(); w.print(); w.close();
         }
     </script>
 </body>
