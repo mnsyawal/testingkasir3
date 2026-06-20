@@ -140,7 +140,6 @@
         async function tarikMasterData() {
             if(!navigator.onLine) return; 
             try {
-                // Mengirimkan SECRET_KEY agar disetujui server
                 const res = await fetch(URL_GAS + "?action=get_kasir_data&api_key=" + SECRET_KEY);
                 const data = await res.json();
                 if(data.status === "success") {
@@ -238,7 +237,6 @@
                 if (arr.length === 0) return;
                 
                 try {
-                    // Menyematkan SECRET_KEY di dalam POST Body
                     const res = await fetch(URL_GAS, { 
                         method: 'POST', 
                         body: JSON.stringify({ action: "sync_transaksi", api_key: SECRET_KEY, data: arr }) 
@@ -271,6 +269,19 @@
             } catch(e){}
         }
 
+        // FUNGSI BARU: Untuk mencetak ulang dengan aman berdasarkan ID Transaksi
+        async function cetakUlangStruk(idTrx) {
+            const tx = riwayatLokal.find(t => t.id_transaksi === idTrx);
+            if (!tx) return;
+            
+            if (!printerServer || !printerServer.connected) {
+                alert("Printer Bluetooth belum terhubung! Silakan klik tombol '🖨️ Printer' di menu atas terlebih dahulu.");
+                return;
+            }
+            
+            await cetakStruk(tx);
+        }
+
         function bukaRiwayat() {
             toggleModal('modal-riwayat'); 
             const c = document.getElementById('list-riwayat'); 
@@ -278,7 +289,21 @@
             
             [...riwayatLokal].reverse().forEach(trx => {
                 let rincianBarang = trx.items.map(i => `<div class="flex justify-between text-xs text-gray-500"><span>${i.qty}x ${i.nama}</span><span>Rp ${i.subtotal.toLocaleString('id-ID')}</span></div>`).join('');
-                c.innerHTML += `<div class="border border-gray-200 rounded-xl p-4 shadow-sm bg-white mb-2"><div class="flex justify-between border-b border-gray-100 pb-2 mb-2"><div class="truncate pr-2"><span class="font-bold text-xs md:text-sm text-gray-800">${trx.id_transaksi}</span><p class="text-[10px] text-gray-400">${new Date(trx.tanggal).toLocaleString('id-ID')} | ${trx.kasir}</p></div><div class="text-right shrink-0"><span class="font-black text-brand text-sm">Rp ${trx.total_bayar.toLocaleString('id-ID')}</span><p class="text-[10px] text-gray-500">${trx.metode_bayar}</p></div></div><div class="space-y-1 mb-3">${rincianBarang}</div><button onclick='cetakStruk(${JSON.stringify(trx)})' class="w-full bg-blue-50 text-brand border border-blue-100 font-bold py-2 rounded-lg text-xs hover:bg-blue-100 active:bg-blue-200 transition shadow-sm">🖨️ Cetak Ulang Struk</button></div>`;
+                c.innerHTML += `
+                <div class="border border-gray-200 rounded-xl p-4 shadow-sm bg-white mb-2">
+                    <div class="flex justify-between border-b border-gray-100 pb-2 mb-2">
+                        <div class="truncate pr-2">
+                            <span class="font-bold text-xs md:text-sm text-gray-800">${trx.id_transaksi}</span>
+                            <p class="text-[10px] text-gray-400">${new Date(trx.tanggal).toLocaleString('id-ID')} | ${trx.kasir}</p>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span class="font-black text-brand text-sm">Rp ${trx.total_bayar.toLocaleString('id-ID')}</span>
+                            <p class="text-[10px] text-gray-500">${trx.metode_bayar}</p>
+                        </div>
+                    </div>
+                    <div class="space-y-1 mb-3">${rincianBarang}</div>
+                    <button onclick="cetakUlangStruk('${trx.id_transaksi}')" class="w-full bg-blue-50 text-brand border border-blue-100 font-bold py-2 rounded-lg text-xs hover:bg-blue-100 active:bg-blue-200 transition shadow-sm">🖨️ Cetak Ulang Struk</button>
+                </div>`;
             });
         }
     </script>
